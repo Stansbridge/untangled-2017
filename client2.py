@@ -7,10 +7,14 @@ import time
 import logging
 import zmq
 import pdb
+import bson
+import json
+import uuid
 from pyre import Pyre
 from pyre import zhelper
 from collections import namedtuple
 from enum import Enum
+from pprint import pprint
 
 class Movement(Enum):
     UP = 1;
@@ -60,7 +64,7 @@ class Network():
         self.node = Pyre("GAME_NODE")
         self.node.set_header("HELLO", "ABC");
         self.node.start();
-        self.node.join(GAME_GROUP);
+        self.node.join("world:position");
         
         self.poller = zmq.Poller()
         self.poller.register(self.node.socket(), zmq.POLLIN)
@@ -74,7 +78,6 @@ class Network():
     def stop(self):
         self.node.stop()
 
-GAME_GROUP = "GAME"
 class PlayerList():
     def __init__(self, me):
         self.me = me
@@ -112,16 +115,9 @@ class GameClient():
         try:
             while running:
                 clock.tick(tickspeed)
-                changes = self.network.poll()
-                print("CHANGES", changes)
-                print("NODE", self.network.node)
-                print("PEERS", self.network.node.peers())
-   
-                for uuid in self.network.node.peers():
-                    self.players.add(uuid)
 
+                # handle inputs
                 me = self.players.me
-
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT or event.type == pygame.locals.QUIT:
                         running = False
@@ -137,11 +133,39 @@ class GameClient():
                             me.move(Movement.RIGHT)
                         pygame.event.clear(pygame.locals.KEYDOWN)
 
+                # draw me
                 self.screen.blit(
                        self.bg_surface, (0, 0))  # Draw the background
                 self.screen.blit(self.image, me.get_position())
 
-                for uuid, player in self.players.others.items():
+                # check network
+                print("NODE", self.network.node)
+                print("PEERS", self.network.node.peers())
+                changes = self.network.poll()
+                if self.network.node.socket() in changes and changes[self.network.node.socket()] == zmq.POLLIN:
+                    cmds = self.network.node.recv()
+                    msg_type = cmds.pop(0)
+                    print("NODE_MSG TYPE: %s" % msg_type)
+                    print("NODE_MSG PEER: %s" % uuid.UUID(bytes=cmds.pop(0)))
+                    print("NODE_MSG NAME: %s" % cmds.pop(0))
+                    if msg_type.decode('utf-8') == "SHOUT":
+                        print("NODE_MSG GROUP: %s" % cmds.pop(0))
+                    elif msg_type.decode('utf-8') == "ENTER":
+                        headers = json.loads(cmds.pop(0).decode('utf-8'))
+                        print("NODE_MSG HEADERS: %s" % headers)
+                        for key in headers:
+                            print("key = {0}, value = {1}".format(key, headers[key]))
+                    print("NODE_MSG PAYLOAD: %s" % cmds)
+                
+                otherPlayers = self.network.node.peers()
+                for playerUUID in otherPlayers:
+                    self.players.add(playerUUID)
+
+                # if there are other peers we can start sending to groups
+                if len(otherPlayers) > 0:
+                    self.network.node.shout("world:position", bson.dumps(me.get_position()._asdict()))
+
+                for playerUUID, player in self.players.others.items():
                     try:
                         self.screen.blit(self.image, player.get_position())
                     except PlayerException as e:
