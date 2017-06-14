@@ -19,13 +19,27 @@ class Movement(Enum):
     LEFT = 4;
 Position = namedtuple('Position', ['x', 'y']);
 
+class PlayerException(Exception):
+    pass
+
 class Player():
-    def __init__(self):
-        self.x = 0
-        self.y = 0
+    def __init__(self, position=()):
+        self.ready = False
         self.step = 10;
+        if len(position) > 0:
+            self.setup(position)
+
+    def __raiseNotSetup(self):
+        raise PlayerException({"message": "Cannot move a player that has not been setup", "player": self})
+
+    def setup(self, position):
+        self.x, self.y = position
+        self.ready = True
 
     def move(self, direction):
+        if not self.ready:
+            self.__raiseNotSetup()
+
         if direction == Movement.UP:
             self.y -= self.step
         elif direction == Movement.RIGHT:
@@ -36,8 +50,10 @@ class Player():
             self.x -= self.step
 
     def get_position(self):
-        return Position(self.x, self.y);
+        if not self.ready:
+            self.__raiseNotSetup()
 
+        return Position(self.x, self.y);
 
 class Network(): 
     def __init__(self):
@@ -59,10 +75,22 @@ class Network():
         self.node.stop()
 
 GAME_GROUP = "GAME"
+class PlayerList():
+    def __init__(self, me):
+        self.me = me
+        self.others = {}
+
+    def add(self, uuid):
+        if uuid not in self.others:
+            self.others[uuid] = Player()
+
+    def all(self):
+        return list(self.others.values()).push(self.me)
+
 class GameClient():
     def __init__(self):
         self.network = Network()
-        self.player = Player();
+        self.players = PlayerList(Player(Position(0, 0)))
         self.setup_pygame()
 
     def setup_pygame(self, width=400, height=300):
@@ -82,13 +110,17 @@ class GameClient():
         tickspeed = 30
 
         try:
-
             while running:
                 clock.tick(tickspeed)
                 changes = self.network.poll()
                 print("CHANGES", changes)
                 print("NODE", self.network.node)
                 print("PEERS", self.network.node.peers())
+   
+                for uuid in self.network.node.peers():
+                    self.players.add(uuid)
+
+                me = self.players.me
 
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT or event.type == pygame.locals.QUIT:
@@ -96,18 +128,25 @@ class GameClient():
                         break
                     elif event.type == pygame.locals.KEYDOWN:
                         if event.key == pygame.locals.K_UP:
-                            self.player.move(Movement.UP)
+                            me.move(Movement.UP)
                         elif event.key == pygame.locals.K_DOWN:
-                            self.player.move(Movement.DOWN)
+                            me.move(Movement.DOWN)
                         elif event.key == pygame.locals.K_LEFT:
-                            self.player.move(Movement.LEFT)
+                            me.move(Movement.LEFT)
                         elif event.key == pygame.locals.K_RIGHT:
-                            self.player.move(Movement.RIGHT)
+                            me.move(Movement.RIGHT)
                         pygame.event.clear(pygame.locals.KEYDOWN)
 
                 self.screen.blit(
                        self.bg_surface, (0, 0))  # Draw the background
-                self.screen.blit(self.image, self.player.get_position())
+                self.screen.blit(self.image, me.get_position())
+
+                for uuid, player in self.players.others.items():
+                    try:
+                        self.screen.blit(self.image, player.get_position())
+                    except PlayerException as e:
+                        # PlayerException due to no initial position being set for that player
+                        print(e)
 
                 pygame.display.update()
                 print("LOOP")
