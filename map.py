@@ -91,7 +91,7 @@ class Map():
     def render(self):
         for y, row in enumerate(self.grid):
             for x, noise_val in enumerate(self.grid[y]):
-                if(noise_val < 0.3):
+                if(noise_val < 0):
                     self.render_grid_tile(x, y, 5)
                 else:
                     self.render_grid_tile(x, y, 3)
