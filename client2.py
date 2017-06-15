@@ -31,18 +31,18 @@ class Player():
         self.ready = False
         self.step = 10;
         if len(position) > 0:
-            self.setup(position)
+            self.set_position(position)
 
-    def __raiseNotSetup(self):
-        raise PlayerException({"message": "Cannot move a player that has not been setup", "player": self})
+    def __raiseNoPosition(self):
+        raise PlayerException({"message": "Player does not have a position set", "player": self})
 
-    def setup(self, position):
+    def set_position(self, position):
         self.x, self.y = position
         self.ready = True
 
     def move(self, direction):
         if not self.ready:
-            self.__raiseNotSetup()
+            self.__raiseNoPosition()
 
         if direction == Movement.UP:
             self.y -= self.step
@@ -55,7 +55,7 @@ class Player():
 
     def get_position(self):
         if not self.ready:
-            self.__raiseNotSetup()
+            self.__raiseNoPosition()
 
         return Position(self.x, self.y);
 
@@ -78,6 +78,12 @@ class Network():
     def stop(self):
         self.node.stop()
 
+    def get_events(self):
+        changes = self.poll()
+        if self.node.socket() in changes and changes[self.node.socket()] == zmq.POLLIN:
+            events = self.node.recent_events()
+            return events
+
 class PlayerList():
     def __init__(self, me):
         self.me = me
@@ -89,6 +95,9 @@ class PlayerList():
 
     def all(self):
         return list(self.others.values()).push(self.me)
+
+    def get(self, uuid):
+        return self.others[uuid]
 
 class GameClient():
     def __init__(self):
@@ -138,28 +147,26 @@ class GameClient():
                        self.bg_surface, (0, 0))  # Draw the background
                 self.screen.blit(self.image, me.get_position())
 
-                # check network
-                print("NODE", self.network.node)
-                print("PEERS", self.network.node.peers())
-                changes = self.network.poll()
-                if self.network.node.socket() in changes and changes[self.network.node.socket()] == zmq.POLLIN:
-                    cmds = self.network.node.recv()
-                    msg_type = cmds.pop(0)
-                    print("NODE_MSG TYPE: %s" % msg_type)
-                    print("NODE_MSG PEER: %s" % uuid.UUID(bytes=cmds.pop(0)))
-                    print("NODE_MSG NAME: %s" % cmds.pop(0))
-                    if msg_type.decode('utf-8') == "SHOUT":
-                        print("NODE_MSG GROUP: %s" % cmds.pop(0))
-                    elif msg_type.decode('utf-8') == "ENTER":
-                        headers = json.loads(cmds.pop(0).decode('utf-8'))
-                        print("NODE_MSG HEADERS: %s" % headers)
-                        for key in headers:
-                            print("key = {0}, value = {1}".format(key, headers[key]))
-                    print("NODE_MSG PAYLOAD: %s" % cmds)
                 
                 otherPlayers = self.network.node.peers()
                 for playerUUID in otherPlayers:
                     self.players.add(playerUUID)
+
+                # check network
+                events = self.network.get_events()
+                try:
+                    for event in self.network.get_events():
+                        print(event.peer_uuid, event.type, event.group, event.msg)
+
+                        if event.group == "world:position":
+                            new_position = bson.loads(event.msg[0])
+                            network_player = self.players.get(event.peer_uuid)
+
+                            if network_player:
+                                network_player.set_position(Position(**new_position))
+                except Exception as e:
+                    print(e)
+                    pass
 
                 # if there are other peers we can start sending to groups
                 if len(otherPlayers) > 0:
@@ -176,7 +183,6 @@ class GameClient():
                 print("LOOP")
         finally:
             self.network.stop();
-
 
 if __name__ == '__main__':
     logger = logging.getLogger("pyre")
