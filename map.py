@@ -4,9 +4,9 @@ from random import randint
 
 
 class Map():
-    seed = "b1148905734895734895789789347589" #lmao
+    seed = "b1148905734895734895789789347589" #lmao keyboard mashing ftw
 
-    def __init__(self, screen, tileset, world_tile_dimen = (16, 16), tileset_tile_dimen = (64, 64)):
+    def __init__(self, screen, tileset, world_tile_dimen = (32, 32), tileset_tile_dimen = (64, 64)):
         self.screen = screen
         self.tileset = tileset
 
@@ -17,9 +17,11 @@ class Map():
         self.offset = {
             "x": 0,
             "y": 0
-            }
+		}
 
-    def init_grid(self, width = 100, height = 100):
+        self.preload_tileset_tiles()
+
+    def init_grid(self, width = 20, height = 20):
         self.grid = [
             [
                 self.gen_grid_tile(i, j) for i in range(width)
@@ -30,6 +32,8 @@ class Map():
     def gen_grid_tile(self, x, y):
         return randint(0, 100);
 
+
+
     def get_grid_tile(self, x, y):
         return self.grid[y][x];
 
@@ -39,23 +43,42 @@ class Map():
 
         return (x, y)
 
+    def tile_id_from_tileset_coord(self, x, y):
+        return y * (self.tileset_width // self.tileset_tile_dimen[0]) + x
+
     def get_grid_tile_subsurface(self, tile_id):
-        clip_coords = self.tileset_coord_from_tile_id(tile_id)
+        sub_surf = 0
+        if(tile_id in self.loaded_tileset_subsurfaces):
+            sub_surf = self.loaded_tileset_subsurfaces[tile_id]
+        else:
+            clip_coords = self.tileset_coord_from_tile_id(tile_id)
 
-        tw = self.tileset_tile_dimen[0]
-        th = self.tileset_tile_dimen[1]
+            tw = self.tileset_tile_dimen[0]
+            th = self.tileset_tile_dimen[1]
 
-        clip_rect = (
-            tw * clip_coords[0],
-            th * clip_coords[1],
-            tw,
-            th,
-        )
+            clip_rect = (
+                tw * clip_coords[0],
+                th * clip_coords[1],
+                tw,
+                th,
+            )
 
-        sub_surf = self.tileset.subsurface(clip_rect)
-        sub_surf = pygame.transform.scale(sub_surf, self.world_tile_dimen)
-
+            sub_surf = self.tileset.subsurface(clip_rect)
+            sub_surf = pygame.transform.scale(sub_surf, self.world_tile_dimen)
+            print("h")
+            self.loaded_tileset_subsurfaces[tile_id] = sub_surf
         return sub_surf
+
+    def preload_tileset_tiles(self):
+        w = self.tileset_width // self.tileset_tile_dimen[0]
+        h = self.tileset_height // self.tileset_tile_dimen[1]
+
+        self.loaded_tileset_subsurfaces = {}
+
+        for i in range(w):
+            for j in range(h):
+                tile_id = self.tile_id_from_tileset_coord(i, j);
+                self.loaded_tileset_subsurfaces[tile_id] = self.get_grid_tile_subsurface(tile_id)
 
     def render_grid_tile(self, x, y, tile_id):
         tile_clipped_image = self.get_grid_tile_subsurface(tile_id)
@@ -64,8 +87,7 @@ class Map():
         return 0
 
     def render(self):
-        for y in range(len(self.grid)):
-            for x in range(len(self.grid[y])):
-                tile_id = self.grid[y][x]
+        for y, row in enumerate(self.grid):
+            for x, tile_id in enumerate(self.grid[y]):
                 self.render_grid_tile(x, y, tile_id)
         return 0
