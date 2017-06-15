@@ -1,18 +1,22 @@
 import pygame
 import pygame.locals
+
+from opensimplex import OpenSimplex
 from random import randint
 
 
 class Map():
-    seed = "b1148905734895734895789789347589" #lmao keyboard mashing ftw
+    seed = 34234234235232343 #lmao keyboard mashing ftw
 
-    def __init__(self, screen, tileset, world_tile_dimen = (32, 32), tileset_tile_dimen = (64, 64)):
+    def __init__(self, screen, tileset, world_tile_dimen = (16, 16), tileset_tile_dimen = (64, 64)):
         self.screen = screen
         self.tileset = tileset
 
         self.tileset_width, self.tileset_height = tileset.get_size()
         self.tileset_tile_dimen = tileset_tile_dimen
         self.world_tile_dimen = world_tile_dimen
+
+        self.openSimplex = OpenSimplex(self.seed)
 
         self.offset = {
             "x": 0,
@@ -30,9 +34,7 @@ class Map():
 
     # TODO: move generation to a new class. 
     def gen_grid_tile(self, x, y):
-        return randint(0, 100);
-
-
+        return self.openSimplex.noise2d(x / 10, y / 10);
 
     def get_grid_tile(self, x, y):
         return self.grid[y][x];
@@ -88,6 +90,9 @@ class Map():
 
     def render(self):
         for y, row in enumerate(self.grid):
-            for x, tile_id in enumerate(self.grid[y]):
-                self.render_grid_tile(x, y, tile_id)
+            for x, noise_val in enumerate(self.grid[y]):
+                if(noise_val < 0.3):
+                    self.render_grid_tile(x, y, 5)
+                else:
+                    self.render_grid_tile(x, y, 3)
         return 0
