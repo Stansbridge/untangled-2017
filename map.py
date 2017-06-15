@@ -17,7 +17,7 @@ class Map():
         self.offset = {
             "x": 0,
             "y": 0
-		}
+            }
 
     def init_grid(self, width = 100, height = 100):
         self.grid = [
@@ -29,8 +29,6 @@ class Map():
     # TODO: move generation to a new class. 
     def gen_grid_tile(self, x, y):
         return randint(0, 100);
-
-
 
     def get_grid_tile(self, x, y):
         return self.grid[y][x];
