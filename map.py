@@ -65,7 +65,7 @@ class Map():
 
             sub_surf = self.tileset.subsurface(clip_rect)
             sub_surf = pygame.transform.scale(sub_surf, self.world_tile_dimen)
-            print("h")
+
             self.loaded_tileset_subsurfaces[tile_id] = sub_surf
         return sub_surf
 
