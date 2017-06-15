@@ -113,9 +113,15 @@ class GameClient():
         self.screen = pygame.display.set_mode((width, height))
         self.player_image = pygame.image.load("sprite.png").convert_alpha()
 
+        pygame.joystick.init()
+        joysticks = [pygame.joystick.Joystick(x) for x in range(pygame.joystick.get_count())]
+        for joystick in joysticks:
+            joystick.init()
+
         pygame.event.set_allowed(None)
         pygame.event.set_allowed([pygame.locals.QUIT,
-                                  pygame.locals.KEYDOWN])
+            pygame.locals.JOYAXISMOTION,
+            pygame.locals.KEYDOWN])
         pygame.key.set_repeat(50, 50)
 
         tileset = pygame.image.load("tileset.png").convert()
@@ -138,6 +144,22 @@ class GameClient():
                     if event.type == pygame.QUIT or event.type == pygame.locals.QUIT:
                         running = False
                         break
+                    # JOYAXISMOTION triggers when the value changes
+                    # We need to retain the direction value each tick
+                    # To emulate 'keydown' functionality
+                    elif event.type == pygame.locals.JOYAXISMOTION:
+                        # up/down
+                        if event.axis == 1:
+                            if int(event.value) < 0:
+                                me.move(Movement.UP)
+                            if int(event.value) > 0:
+                                me.move(Movement.DOWN)
+                        # left/right
+                        elif event.axis == 0:
+                            if int(event.value) < 0:
+                                me.move(Movement.LEFT)
+                            if int(event.value) > 0:
+                                me.move(Movement.RIGHT)
                     elif event.type == pygame.locals.KEYDOWN:
                         if event.key == pygame.locals.K_UP:
                             me.move(Movement.UP)
@@ -158,19 +180,20 @@ class GameClient():
 
                 # check network
                 events = self.network.get_events()
-                try:
-                    for event in self.network.get_events():
-                        print(event.peer_uuid, event.type, event.group, event.msg)
+                if events:
+                    try:
+                        for event in self.network.get_events():
+                            print(event.peer_uuid, event.type, event.group, event.msg)
 
-                        if event.group == "world:position":
-                            new_position = bson.loads(event.msg[0])
-                            network_player = self.players.get(event.peer_uuid)
+                            if event.group == "world:position":
+                                new_position = bson.loads(event.msg[0])
+                                network_player = self.players.get(event.peer_uuid)
 
-                            if network_player:
-                                network_player.set_position(Position(**new_position))
-                except Exception as e:
-                    print(e)
-                    pass
+                                if network_player:
+                                    network_player.set_position(Position(**new_position))
+                    except Exception as e:
+                        print(e)
+                        pass
 
                 # if there are other peers we can start sending to groups
                 if len(otherPlayers) > 0:
@@ -182,9 +205,9 @@ class GameClient():
                     except PlayerException as e:
                         # PlayerException due to no initial position being set for that player
                         print(e)
+                        pass
 
                 pygame.display.update()
-                print("LOOP")
         finally:
             self.network.stop();
 
