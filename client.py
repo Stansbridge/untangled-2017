@@ -88,14 +88,16 @@ class Network():
             events = self.node.recent_events()
             return events
 
-class PlayerList():
+class PlayerManager():
     def __init__(self, me):
         self.me = me
         self.others = {}
 
-    def add(self, uuid):
-        if uuid not in self.others:
-            self.others[uuid] = Player()
+    def set(self, players):
+        newPlayers = {}
+        for uuid in players:
+            newPlayers[uuid] = self.others.get(uuid, Player());
+        self.others = newPlayers;
 
     def all(self):
         return list(self.others.values()).push(self.me)
@@ -106,7 +108,7 @@ class PlayerList():
 class GameClient():
     def __init__(self):
         self.network = Network()
-        self.players = PlayerList(Player(Position(0, 0)))
+        self.players = PlayerManager(Player(Position(0, 0)))
         self.setup_pygame()
 
     def setup_pygame(self, width=400, height=300):
@@ -174,10 +176,7 @@ class GameClient():
                 self.map.render()
                 self.screen.blit(self.player_image, me.get_position())
                 
-                otherPlayers = self.network.node.peers()
-                for playerUUID in otherPlayers:
-                    self.players.add(playerUUID)
-
+                self.players.set(self.network.node.peers())
                 # check network
                 events = self.network.get_events()
                 if events:
@@ -196,7 +195,7 @@ class GameClient():
                         pass
 
                 # if there are other peers we can start sending to groups
-                if len(otherPlayers) > 0:
+                if self.players.others:
                     self.network.node.shout("world:position", bson.dumps(me.get_position()._asdict()))
 
                 for playerUUID, player in self.players.others.items():
