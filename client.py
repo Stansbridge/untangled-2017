@@ -13,103 +13,21 @@ from pyre import Pyre
 from pyre import zhelper
 from collections import namedtuple
 from enum import Enum
-from map import Map
 
+from map import Map
+from network import Network
+from player import *
 
 white = (255,255,255)
 black = (0,0,0)
 red = (255, 0, 0)
 
-class Movement(Enum):
-    UP = 1;
-    RIGHT = 2;
-    DOWN = 3;
-    LEFT = 4;
-Position = namedtuple('Position', ['x', 'y']);
-
-class PlayerException(Exception):
-    pass
-
-class Player():
-    def __init__(self, position=()):
-        self.ready = False
-        self.step = 10;
-        if len(position) > 0:
-            self.set_position(position)
-
-    def __raiseNoPosition(self):
-        raise PlayerException({"message": "Player does not have a position set", "player": self})
-
-    def set_position(self, position):
-        self.x, self.y = position
-        self.ready = True
-
-    def move(self, direction):
-        if not self.ready:
-            self.__raiseNoPosition()
-
-        if direction == Movement.UP:
-            self.y -= self.step
-        elif direction == Movement.RIGHT:
-            self.x += self.step
-        elif direction == Movement.DOWN:
-            self.y += self.step
-        elif direction == Movement.LEFT:
-            self.x -= self.step
-
-    def get_position(self):
-        if not self.ready:
-            self.__raiseNoPosition()
-
-        return Position(self.x, self.y);
-
-class Network(): 
-    def __init__(self):
-        self.node = Pyre("GAME_NODE")
-        self.node.set_header("HELLO", "ABC");
-        self.node.start();
-        self.node.join("world:position");
-        
-        self.poller = zmq.Poller()
-        self.poller.register(self.node.socket(), zmq.POLLIN)
-
-    def poll(self):
-        return dict(self.poller.poll(0))
-
-    def peers():
-        return self.node.peers()
-
-    def stop(self):
-        self.node.stop()
-
-    def get_events(self):
-        changes = self.poll()
-        if self.node.socket() in changes and changes[self.node.socket()] == zmq.POLLIN:
-            events = self.node.recent_events()
-            return events
-
-class PlayerManager():
-    def __init__(self, me):
-        self.me = me
-        self.others = {}
-
-    def set(self, players):
-        newPlayers = {}
-        for uuid in players:
-            newPlayers[uuid] = self.others.get(uuid, Player());
-        self.others = newPlayers;
-
-    def all(self):
-        return list(self.others.values()).push(self.me)
-
-    def get(self, uuid):
-        return self.others[uuid]
 
 class GameClient():
     def __init__(self):
         self.network = Network()
-        self.players = PlayerManager(Player(Position(0, 0)))
         self.setup_pygame()
+        self.players = PlayerManager(Player(self.screen, self.map, Position(0, 0)))
 
     def setup_pygame(self, width=400, height=300):
         self.screen = pygame.display.set_mode((width, height))
@@ -174,7 +92,7 @@ class GameClient():
                         pygame.event.clear(pygame.locals.KEYDOWN)
 
                 self.map.render()
-                self.screen.blit(self.player_image, me.get_position())
+                me.render()
                 
                 self.players.set(self.network.node.peers())
                 # check network
@@ -200,7 +118,8 @@ class GameClient():
 
                 for playerUUID, player in self.players.others.items():
                     try:
-                        self.screen.blit(self.player_image, player.get_position())
+                        # self.screen.blit(self.player_image, player.get_position())
+                        player.render()
                     except PlayerException as e:
                         # PlayerException due to no initial position being set for that player
                         print(e)
@@ -208,7 +127,7 @@ class GameClient():
 
                 pygame.display.update()
         finally:
-            self.network.stop();
+            self.network.stop()
 
 if __name__ == '__main__':
     logger = logging.getLogger("pyre")

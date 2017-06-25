@@ -2,8 +2,6 @@ import pygame
 import pygame.locals
 
 from opensimplex import OpenSimplex
-from random import randint
-
 
 class Map():
     seed = 34234234235232343 #lmao keyboard mashing ftw
@@ -34,10 +32,17 @@ class Map():
 
     # TODO: move generation to a new class. 
     def gen_grid_tile(self, x, y):
-        return self.openSimplex.noise2d(x / 10, y / 10);
+        noise = self.openSimplex.noise2d(x / 10, y / 10)
+
+        if (noise < 0):
+            tile_val = 6
+        else:
+            tile_val = 2
+
+        return tile_val
 
     def get_grid_tile(self, x, y):
-        return self.grid[y][x];
+        return self.grid[y][x]
 
     def tileset_coord_from_tile_id(self, tile_id):
         x = tile_id % (self.tileset_width // self.tileset_tile_dimen[0])
@@ -49,7 +54,6 @@ class Map():
         return y * (self.tileset_width // self.tileset_tile_dimen[0]) + x
 
     def get_grid_tile_subsurface(self, tile_id):
-        sub_surf = 0
         if(tile_id in self.loaded_tileset_subsurfaces):
             sub_surf = self.loaded_tileset_subsurfaces[tile_id]
         else:
@@ -88,11 +92,14 @@ class Map():
         self.screen.blit(tile_clipped_image, (x * self.world_tile_dimen[0], y * self.world_tile_dimen[1]))
         return 0
 
+    def check_collision(self, x, y):
+        adjusted_x = x // self.world_tile_dimen[0]
+        adjusted_y = y // self.world_tile_dimen[1]
+
+        return self.get_grid_tile(adjusted_x, adjusted_y)
+
     def render(self):
         for y, row in enumerate(self.grid):
-            for x, noise_val in enumerate(self.grid[y]):
-                if(noise_val < 0):
-                    self.render_grid_tile(x, y, 5)
-                else:
-                    self.render_grid_tile(x, y, 3)
+            for x, tile_val in enumerate(self.grid[y]):
+                self.render_grid_tile(x, y, tile_val)
         return 0
