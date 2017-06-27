@@ -21,7 +21,6 @@ class Player():
         self.map = map
         self.ready = False
         self.size = size
-        self.boundRect = Rect(position, size)
         self.step = 16
 
         if len(position) > 0:
@@ -32,14 +31,10 @@ class Player():
 
     def set_position(self, position):
         self.x, self.y = position
-        self.update_bound_rect(position)
         self.ready = True
 
-    def update_bound_rect(self, position):
-        self.boundRect = Rect(position, self.size)
-
     def render(self):
-        pygame.draw.rect(self.screen, (255,255,255), self.boundRect)
+        pygame.draw.rect(self.screen, (255,255,255), Rect(self.get_position(), self.size))
 
     def move(self, direction):
         if not self.ready:
@@ -61,9 +56,7 @@ class Player():
 
         # Only tiles of ID 6 are collidable right now.
         if(collide != 6):
-            self.x = tmp_x
-            self.y = tmp_y
-            self.update_bound_rect((self.x, self.y))
+            self.set_position(Position(tmp_x, tmp_y))
 
     def get_position(self):
         if not self.ready:
@@ -79,7 +72,7 @@ class PlayerManager():
     def set(self, players):
         newPlayers = {}
         for uuid in players:
-            newPlayers[uuid] = self.others.get(uuid, Player(self.me.screen, self.me.map, (0,0)))
+            newPlayers[uuid] = self.others.get(uuid, Player(self.me.screen, self.me.map))
         self.others = newPlayers
 
     def all(self):
