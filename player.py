@@ -32,6 +32,7 @@ class Player():
 
     def set_position(self, position):
         self.x, self.y = position
+        self.update_bound_rect(position)
         self.ready = True
 
     def update_bound_rect(self, position):
@@ -78,7 +79,7 @@ class PlayerManager():
     def set(self, players):
         newPlayers = {}
         for uuid in players:
-            newPlayers[uuid] = self.others.get(uuid, Player(self.me.screen, self.me.map))
+            newPlayers[uuid] = self.others.get(uuid, Player(self.me.screen, self.me.map, (0,0)))
         self.others = newPlayers
 
     def all(self):

@@ -27,7 +27,7 @@ class GameClient():
     def __init__(self):
         self.network = Network()
         self.setup_pygame()
-        self.players = PlayerManager(Player(self.screen, self.map, Position(0, 0)))
+        self.players = PlayerManager(Player(self.screen, self.map, (0, 0)))
 
     def setup_pygame(self, width=400, height=300):
         self.screen = pygame.display.set_mode((width, height))
