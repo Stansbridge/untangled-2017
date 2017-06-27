@@ -21,8 +21,8 @@ class Player():
         self.map = map
         self.ready = False
         self.size = size
-        self.boundRect = Rect(position, size)
         self.step = 16
+        self.set_bound(Position(0,0))
 
         if len(position) > 0:
             self.set_position(position)
@@ -30,11 +30,12 @@ class Player():
     def __raiseNoPosition(self):
         raise PlayerException({"message": "Player does not have a position set", "player": self})
 
-    def set_position(self, position):
-        self.x, self.y = position
-        self.ready = True
+    def set_bound(self, position):
+        self.boundRect = Rect(position, self.size)
 
-    def update_bound_rect(self, position):
+    def set_position(self, position):
+        self.ready = True
+        self.x, self.y = position
         self.boundRect = Rect(position, self.size)
 
     def render(self):
@@ -60,9 +61,7 @@ class Player():
 
         # Only tiles of ID 6 are collidable right now.
         if(collide != 6):
-            self.x = tmp_x
-            self.y = tmp_y
-            self.update_bound_rect((self.x, self.y))
+            self.set_position(Position(tmp_x, tmp_y))
 
     def get_position(self):
         if not self.ready:
