@@ -1,6 +1,6 @@
 from collections import namedtuple
 from enum import Enum
-
+import random
 import pygame
 from pygame.rect import Rect
 
@@ -16,12 +16,13 @@ class PlayerException(Exception):
     pass
 
 class Player():
-    def __init__(self, screen, map, position=(), size=(16, 16)):
+    def __init__(self, screen, map, position=(), size=(16, 16), colour=(255, 255, 255)):
         self.screen = screen
         self.map = map
         self.ready = False
         self.size = size
         self.step = 16
+        self.colour = colour;
 
         if len(position) > 0:
             self.set_position(position)
@@ -34,7 +35,7 @@ class Player():
         self.ready = True
 
     def render(self):
-        pygame.draw.rect(self.screen, (255,255,255), Rect(self.get_position(), self.size))
+        pygame.draw.rect(self.screen, self.colour, Rect(self.get_position(), self.size))
 
     def move(self, direction):
         if not self.ready:
@@ -72,7 +73,9 @@ class PlayerManager():
     def set(self, players):
         newPlayers = {}
         for uuid in players:
-            newPlayers[uuid] = self.others.get(uuid, Player(self.me.screen, self.me.map))
+            random.seed(uuid)
+            colour = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+            newPlayers[uuid] = self.others.get(uuid, Player(self.me.screen, self.me.map, colour=colour))
         self.others = newPlayers
 
     def all(self):
