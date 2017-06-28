@@ -3,13 +3,17 @@ import pygame.locals
 
 from opensimplex import OpenSimplex
 
+from player import *
+
 class Map():
     seed = 34234234235232343 #lmao keyboard mashing ftw
 
     def __init__(self, screen, tileset, world_tile_dimen = (16, 16), tileset_tile_dimen = (64, 64)):
         self.screen = screen
-        self.tileset = tileset
+        self.screen_size = screen.get_size()
 
+        self.tileset = tileset
+    
         self.tileset_width, self.tileset_height = tileset.get_size()
         self.tileset_tile_dimen = tileset_tile_dimen
         self.world_tile_dimen = world_tile_dimen
@@ -17,19 +21,26 @@ class Map():
         self.openSimplex = OpenSimplex(self.seed)
 
         self.offset = {
-            "x": 0,
-            "y": 0
-		}
+            'x': 0,
+            'y': 0
+        }
 
         self.preload_tileset_tiles()
 
-    def init_grid(self, width = 20, height = 20):
+    def init_grid(self, width = 200, height = 200):
+        self.width = width
+        self.height = height
+        
         self.grid = [
             [
                 self.gen_grid_tile(i, j) for i in range(width)
             ] for j in range(height)
         ]
 
+    def set_centre_player(self, player):
+        player.is_centre = True
+        self.centre_player = player
+        
     # TODO: move generation to a new class. 
     def gen_grid_tile(self, x, y):
         noise = self.openSimplex.noise2d(x / 10, y / 10)
@@ -101,5 +112,8 @@ class Map():
     def render(self):
         for y, row in enumerate(self.grid):
             for x, tile_val in enumerate(self.grid[y]):
-                self.render_grid_tile(x, y, tile_val)
+                self.offset['x'] = -self.centre_player.x // self.world_tile_dimen[0] + self.screen_size[0] // self.world_tile_dimen[0] * 0.5 
+                self.offset['y'] = -self.centre_player.y // self.world_tile_dimen[1] + self.screen_size[1] // self.world_tile_dimen[1] * 0.5
+
+                self.render_grid_tile(x + self.offset['x'], y + self.offset['y'], tile_val)
         return 0

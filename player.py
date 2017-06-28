@@ -1,5 +1,6 @@
 from collections import namedtuple
 from enum import Enum
+import math
 import random
 import pygame
 from pygame.rect import Rect
@@ -20,11 +21,13 @@ class Player():
         self.screen = screen
         self.map = map
         self.ready = False
+        self.is_centre = False
         self.size = size
         self.step = 16
         self.colour = colour;
 
         if len(position) > 0:
+            self.initial_position = position
             self.set_position(position)
 
     def __raiseNoPosition(self):
@@ -35,7 +38,20 @@ class Player():
         self.ready = True
 
     def render(self):
-        pygame.draw.rect(self.screen, self.colour, Rect(self.get_position(), self.size))
+        if(self.is_centre):
+            centre = (
+                self.initial_position[0] + ((self.map.screen_size[0] // self.map.world_tile_dimen[0]) * 16) * 0.5,
+                self.initial_position[1] + ((self.map.screen_size[1] // self.map.world_tile_dimen[1]) * 16) * 0.5
+            )
+            pygame.draw.rect(self.screen, self.colour, Rect(centre, self.size))
+        else:
+            centre = (
+                self.get_position()[0] - self.map.centre_player.x + ((self.map.screen_size[0] // self.map.world_tile_dimen[0]) * 16) * 0.5,
+                self.get_position()[1] - self.map.centre_player.y + ((self.map.screen_size[1] // self.map.world_tile_dimen[1]) * 16) * 0.5
+            )
+
+            pygame.draw.rect(self.screen, self.colour, Rect(centre, self.size))
+
 
     def move(self, direction):
         if not self.ready:
