@@ -31,7 +31,7 @@ class GameClient():
         self.map.set_centre_player(self.players.me) 
 
     def setup_pygame(self, width=400, height=300):
-        self.screen = pygame.display.set_mode((width, height))
+        self.screen = pygame.display.set_mode((1024, 680), pygame.HWSURFACE|pygame.FULLSCREEN)
         self.player_image = pygame.image.load("sprite.png").convert_alpha()
 
         pygame.joystick.init()
@@ -63,7 +63,7 @@ class GameClient():
                 # handle inputs
                 me = self.players.me
                 for event in pygame.event.get():
-                    if event.type == pygame.QUIT or event.type == pygame.locals.QUIT:
+                    if event.type == pygame.QUIT or event.type == pygame.locals.QUIT or event.key == pygame.locals.K_ESCAPE:
                         running = False
                         break
                     # JOYAXISMOTION triggers when the value changes

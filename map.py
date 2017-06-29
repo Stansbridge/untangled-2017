@@ -27,7 +27,7 @@ class Map():
 
         self.preload_tileset_tiles()
 
-    def init_grid(self, width = 200, height = 200):
+    def init_grid(self, width = 50, height = 50):
         self.width = width
         self.height = height
         
