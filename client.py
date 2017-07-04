@@ -31,7 +31,7 @@ class GameClient():
         self.map.set_centre_player(self.players.me) 
 
     def setup_pygame(self, width=1024, height=768):
-        self.screen = pygame.display.set_mode((width, height), pygame.HWSURFACE|pygame.FULLSCREEN)
+        self.screen = pygame.display.set_mode((width, height), pygame.HWSURFACE)
         self.player_image = pygame.image.load("sprite.png").convert_alpha()
 
         pygame.joystick.init()
