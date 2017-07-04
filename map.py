@@ -27,7 +27,7 @@ class Map():
 
         self.preload_tileset_tiles()
 
-    def init_grid(self, width = 50, height = 50):
+    def init_grid(self, width = 200, height = 200):
         self.width = width
         self.height = height
         
@@ -110,10 +110,26 @@ class Map():
         return self.get_grid_tile(adjusted_x, adjusted_y)
 
     def render(self):
+
+        screen_tile_width = self.screen_size[0] // self.world_tile_dimen[0]
+        screen_tile_height = self.screen_size[1] // self.world_tile_dimen[1]
+
+        player_pos_screen_x = self.centre_player.x // self.world_tile_dimen[0]
+        player_pos_screen_y = self.centre_player.y // self.world_tile_dimen[1]
+
+        self.offset['x'] = -player_pos_screen_x + screen_tile_width * 0.5
+        self.offset['y'] = -player_pos_screen_y + screen_tile_height * 0.5
+
+        screen_clip_rect = Rect((0, 0), (screen_tile_width, screen_tile_height))
+
         for y, row in enumerate(self.grid):
             for x, tile_val in enumerate(self.grid[y]):
-                self.offset['x'] = -self.centre_player.x // self.world_tile_dimen[0] + self.screen_size[0] // self.world_tile_dimen[0] * 0.5 
-                self.offset['y'] = -self.centre_player.y // self.world_tile_dimen[1] + self.screen_size[1] // self.world_tile_dimen[1] * 0.5
+                final_x = x + self.offset['x']
+                final_y = y + self.offset['y']
 
-                self.render_grid_tile(x + self.offset['x'], y + self.offset['y'], tile_val)
+                tile_clip_rect = Rect((final_x, final_y), (1, 1))
+
+                if(screen_clip_rect.contains(tile_clip_rect)):
+                    self.render_grid_tile(final_x, final_y, tile_val)
+
         return 0

@@ -23,7 +23,7 @@ class Player():
         self.ready = False
         self.is_centre = False
         self.size = size
-        self.step = 16
+        self.step = self.size[0]
         self.colour = colour;
 
         if len(position) > 0:
@@ -40,14 +40,14 @@ class Player():
     def render(self):
         if(self.is_centre):
             centre = (
-                self.initial_position[0] + ((self.map.screen_size[0] // self.map.world_tile_dimen[0]) * 16) * 0.5,
-                self.initial_position[1] + ((self.map.screen_size[1] // self.map.world_tile_dimen[1]) * 16) * 0.5
+                self.initial_position[0] + ((self.map.screen_size[0] // self.map.world_tile_dimen[0]) * self.size[0]) * 0.5,
+                self.initial_position[1] + ((self.map.screen_size[1] // self.map.world_tile_dimen[1]) * self.size[1]) * 0.5
             )
             pygame.draw.rect(self.screen, self.colour, Rect(centre, self.size))
         else:
             centre = (
-                self.get_position()[0] - self.map.centre_player.x + ((self.map.screen_size[0] // self.map.world_tile_dimen[0]) * 16) * 0.5,
-                self.get_position()[1] - self.map.centre_player.y + ((self.map.screen_size[1] // self.map.world_tile_dimen[1]) * 16) * 0.5
+                self.get_position()[0] - self.map.centre_player.x + ((self.map.screen_size[0] // self.map.world_tile_dimen[0]) * self.size[0]) * 0.5,
+                self.get_position()[1] - self.map.centre_player.y + ((self.map.screen_size[1] // self.map.world_tile_dimen[1]) * self.size[1]) * 0.5
             )
 
             pygame.draw.rect(self.screen, self.colour, Rect(centre, self.size))
