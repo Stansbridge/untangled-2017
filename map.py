@@ -27,7 +27,7 @@ class Map():
 
         self.preload_tileset_tiles()
 
-    def init_grid(self, width = 200, height = 200):
+    def init_grid(self, width = 500, height = 500):
         self.width = width
         self.height = height
         
@@ -68,6 +68,7 @@ class Map():
         if(tile_id in self.loaded_tileset_subsurfaces):
             sub_surf = self.loaded_tileset_subsurfaces[tile_id]
         else:
+            print("tileset cache miss")
             clip_coords = self.tileset_coord_from_tile_id(tile_id)
 
             tw = self.tileset_tile_dimen[0]
@@ -123,13 +124,20 @@ class Map():
         screen_clip_rect = Rect((0, 0), (screen_tile_width, screen_tile_height))
 
         for y, row in enumerate(self.grid):
+            final_y = y + self.offset['y']
+            tile_clip_rect = Rect((0, final_y), (1, 1))
+
+            if(not screen_clip_rect.contains(tile_clip_rect)):
+                continue;
+
             for x, tile_val in enumerate(self.grid[y]):
                 final_x = x + self.offset['x']
-                final_y = y + self.offset['y']
 
                 tile_clip_rect = Rect((final_x, final_y), (1, 1))
 
-                if(screen_clip_rect.contains(tile_clip_rect)):
-                    self.render_grid_tile(final_x, final_y, tile_val)
+                if(not screen_clip_rect.contains(tile_clip_rect)):
+                    continue;
+
+                self.render_grid_tile(final_x, final_y, tile_val)
 
         return 0
