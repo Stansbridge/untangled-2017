@@ -27,7 +27,7 @@ class GameClient():
     def __init__(self):
         self.network = Network()
         self.setup_pygame()
-        self.players = PlayerManager(Player(self.screen, self.map, (0, 0), (16, 16)))
+        self.players = PlayerManager(Player(self.screen, self.map, (0, 0), (32, 32)))
         self.map.set_centre_player(self.players.me) 
 
     def setup_pygame(self, width=1024, height=1024):
@@ -47,7 +47,7 @@ class GameClient():
 
         tileset = pygame.image.load("tileset.png").convert()
         
-        self.map = Map(self.screen, tileset, (16, 16));
+        self.map = Map(self.screen, tileset, (32, 32), (64, 64))
         self.map.init_grid();
 
     def run(self):

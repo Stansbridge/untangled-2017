@@ -2,23 +2,39 @@ import pygame
 import pygame.locals
 
 from opensimplex import OpenSimplex
+from enum import Enum
 
 from player import *
+
+'''
+Tiles represents the actions which a tile is able to inflict upon a player.
+
+'''
+class Tiles(Enum):
+    COLLIDE = 1
+    SPIKES = 2
+    LAVA = 4
+    WATER = 8
 
 class Map():
     seed = 34234234235232343 #lmao keyboard mashing ftw
 
-    def __init__(self, screen, tileset, world_tile_dimen = (16, 16), tileset_tile_dimen = (64, 64)):
+    def __init__(self, screen, tileset, world_tile_dimen, tileset_tile_dimen):
         self.screen = screen
         self.screen_size = screen.get_size()
 
         self.tileset = tileset
-    
+
         self.tileset_width, self.tileset_height = tileset.get_size()
         self.tileset_tile_dimen = tileset_tile_dimen
         self.world_tile_dimen = world_tile_dimen
 
         self.openSimplex = OpenSimplex(self.seed)
+
+        # Tuple holding all tiles which will report as a collision.
+        self.tile_attributes = {
+            6: Tiles.COLLIDE.value,
+        }
 
         self.offset = {
             'x': 0,
@@ -27,10 +43,10 @@ class Map():
 
         self.preload_tileset_tiles()
 
-    def init_grid(self, width = 500, height = 500):
+    def init_grid(self, width = 20, height = 20):
         self.width = width
         self.height = height
-        
+
         self.grid = [
             [
                 self.gen_grid_tile(i, j) for i in range(width)
@@ -40,20 +56,28 @@ class Map():
     def set_centre_player(self, player):
         player.is_centre = True
         self.centre_player = player
-        
-    # TODO: move generation to a new class. 
+
+    # TODO: move generation to a new class.
     def gen_grid_tile(self, x, y):
         noise = self.openSimplex.noise2d(x / 10, y / 10)
 
-        if (noise < 0):
+        if (noise < -0.5):
             tile_val = 6
-        else:
+        elif noise < -0.2:
             tile_val = 2
+        else:
+            tile_val = 67
 
         return tile_val
 
+    def get_centre(self):
+        return (self.screen_size[0] * 0.5, self.screen_size[1] * 0.5)
+
     def get_grid_tile(self, x, y):
         return self.grid[y][x]
+
+    def get_tile_id_attrib(self, tile_id):
+        return self.tile_attributes.get(tile_id)
 
     def tileset_coord_from_tile_id(self, tile_id):
         x = tile_id % (self.tileset_width // self.tileset_tile_dimen[0])
@@ -68,7 +92,8 @@ class Map():
         if(tile_id in self.loaded_tileset_subsurfaces):
             sub_surf = self.loaded_tileset_subsurfaces[tile_id]
         else:
-            print("tileset cache miss")
+
+            print("tileset cache miss. loading tile: {0}".format(tile_id))
             clip_coords = self.tileset_coord_from_tile_id(tile_id)
 
             tw = self.tileset_tile_dimen[0]
@@ -81,7 +106,7 @@ class Map():
                 th,
             )
 
-            sub_surf = self.tileset.subsurface(clip_rect)
+            sub_surf = self.tileset.subsurface(clip_rect).convert_alpha()
             sub_surf = pygame.transform.scale(sub_surf, self.world_tile_dimen)
 
             self.loaded_tileset_subsurfaces[tile_id] = sub_surf
@@ -95,7 +120,7 @@ class Map():
 
         for i in range(w):
             for j in range(h):
-                tile_id = self.tile_id_from_tileset_coord(i, j);
+                tile_id = self.tile_id_from_tileset_coord(i, j)
                 self.loaded_tileset_subsurfaces[tile_id] = self.get_grid_tile_subsurface(tile_id)
 
     def render_grid_tile(self, x, y, tile_id):
@@ -104,11 +129,17 @@ class Map():
         self.screen.blit(tile_clipped_image, (x * self.world_tile_dimen[0], y * self.world_tile_dimen[1]))
         return 0
 
-    def check_collision(self, x, y):
+    def get_tile_attributes(self, x, y):
         adjusted_x = x // self.world_tile_dimen[0]
         adjusted_y = y // self.world_tile_dimen[1]
 
-        return self.get_grid_tile(adjusted_x, adjusted_y)
+        # Lookup for the tile_id at the provided x, y coordinates.
+        tile_id = self.get_grid_tile(adjusted_x, adjusted_y)
+
+        # Lookup the collision status for the current tile_id, defaults to 0 (no status).
+        collide_status = self.get_tile_id_attrib(tile_id) or 0
+
+        return collide_status
 
     def render(self):
 
@@ -128,15 +159,14 @@ class Map():
             tile_clip_rect = Rect((0, final_y), (1, 1))
 
             if(not screen_clip_rect.contains(tile_clip_rect)):
-                continue;
+                continue
 
             for x, tile_val in enumerate(self.grid[y]):
                 final_x = x + self.offset['x']
-
                 tile_clip_rect = Rect((final_x, final_y), (1, 1))
 
                 if(not screen_clip_rect.contains(tile_clip_rect)):
-                    continue;
+                    continue
 
                 self.render_grid_tile(final_x, final_y, tile_val)
 

@@ -17,14 +17,14 @@ class PlayerException(Exception):
     pass
 
 class Player():
-    def __init__(self, screen, map, position=(), size=(16, 16), colour=(255, 255, 255)):
+    def __init__(self, screen, map, position=(0, 0), size=(32, 32), colour=(255, 255, 255)):
         self.screen = screen
         self.map = map
         self.ready = False
         self.is_centre = False
         self.size = size
         self.step = self.size[0]
-        self.colour = colour;
+        self.colour = colour
 
         if len(position) > 0:
             self.initial_position = position
@@ -35,27 +35,28 @@ class Player():
 
     def set_position(self, position):
         self.x, self.y = position
+        print('X: {0} Y: {1}'.format(self.x // self.size[0], self.y // self.size[1]))
         self.ready = True
 
     def render(self):
+        centre = self.map.get_centre()
+
         if(self.is_centre):
-            centre = (
-                self.initial_position[0] + ((self.map.screen_size[0] // self.map.world_tile_dimen[0]) * self.size[0]) * 0.5,
-                self.initial_position[1] + ((self.map.screen_size[1] // self.map.world_tile_dimen[1]) * self.size[1]) * 0.5
-            )
             pygame.draw.rect(self.screen, self.colour, Rect(centre, self.size))
         else:
-            centre = (
-                self.get_position()[0] - self.map.centre_player.x + ((self.map.screen_size[0] // self.map.world_tile_dimen[0]) * self.size[0]) * 0.5,
-                self.get_position()[1] - self.map.centre_player.y + ((self.map.screen_size[1] // self.map.world_tile_dimen[1]) * self.size[1]) * 0.5
+            offset_centre = (
+                self.x - self.map.centre_player.x + centre[0],
+                self.y - self.map.centre_player.y + centre[1]
             )
 
-            pygame.draw.rect(self.screen, self.colour, Rect(centre, self.size))
+            pygame.draw.rect(self.screen, self.colour, Rect(offset_centre, self.size))
 
 
     def move(self, direction):
         if not self.ready:
             self.__raiseNoPosition()
+
+        collision = False
 
         tmp_x = self.x
         tmp_y = self.y
@@ -69,11 +70,22 @@ class Player():
         elif direction == Movement.LEFT:
             tmp_x -= self.step
 
-        collide = self.map.check_collision(tmp_x, tmp_y)
+        tile_attribs = self.map.get_tile_attributes(tmp_x, tmp_y)
 
-        # Only tiles of ID 6 are collidable right now.
-        if(collide != 6):
-            self.set_position(Position(tmp_x, tmp_y))
+        # Import Tiles information Enum.
+        from map import Tiles
+
+        # TODO: Prevent the player from moving beyond the bounds of the map.
+
+        # If the tile_attribs includes "Tiles.COLLIDE" record this as a collision.
+        if(tile_attribs & Tiles.COLLIDE.value):
+            collision = True
+
+        # If a collision has occurred return before the player has moved.
+        if(collision):
+            return
+
+        self.set_position(Position(tmp_x, tmp_y))
 
     def get_position(self):
         if not self.ready:
