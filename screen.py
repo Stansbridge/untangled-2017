@@ -42,6 +42,9 @@ class Menu(Screen):
 
     def render(self, offset = (0, 0)):
         font = self.fonts['large']
+        header_font = self.fonts['heading']
+
+        self.render_text(header_font, "Untangled 2017", (offset[0] - 125, 300), (100, 200,100))
 
         for key, value in self.options.items():
             if(value['pos'] == self.selected):
@@ -78,8 +81,6 @@ class Menu(Screen):
                     return GameState.QUIT
 
             pygame.event.clear(pygame.locals.KEYDOWN)
-
-
 
         return
 
