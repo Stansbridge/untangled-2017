@@ -27,6 +27,9 @@ red = (255, 0, 0)
 class GameState(Enum):
     MENU = 0
     PLAY = 1
+    HELP = 2
+    CHARACTER = 3
+    QUIT = 4
 
 class GameClient():
     game_state = GameState.MENU
@@ -63,6 +66,10 @@ class GameClient():
         self.map = Map(self.screen, tileset, (32, 32), (64, 64))
         self.map.init_grid()
 
+    def set_state(self, new_state):
+        if(new_state and new_state != self.game_state):
+            self.game_state = new_state
+
     def run(self):
         running = True
         clock = pygame.time.Clock()
@@ -72,22 +79,26 @@ class GameClient():
             while running:
                 self.screen.fill((white))
                 clock.tick(tickspeed)
-
-                if(self.game_state == GameState.MENU):
-                    self.menu.render()
+                if(self.game_state.value == GameState.MENU.value):
+                    self.menu.render((self.map.screen_size[0] * 0.45, self.map.screen_size[1]*0.4))
                     for event in pygame.event.get():
                         if event.type == pygame.QUIT or event.type == pygame.locals.QUIT or event.key == pygame.locals.K_ESCAPE:
                             running = False
                             break
 
-                        self.menu.update(event)
+                        self.set_state(self.menu.update(event))
+                elif(self.game_state.value == GameState.QUIT.value):
+                    running = False
+                    break
                 else:
                     # handle inputs
                     me = self.players.me
                     for event in pygame.event.get():
-                        if event.type == pygame.QUIT or event.type == pygame.locals.QUIT or event.key == pygame.locals.K_ESCAPE:
+                        if event.type == pygame.QUIT or event.type == pygame.locals.QUIT:
                             running = False
                             break
+                        elif event.key == pygame.locals.K_ESCAPE:
+                            self.set_state(GameState.MENU)
                         # JOYAXISMOTION triggers when the value changes
                         # We need to retain the direction value each tick
                         # To emulate 'keydown' functionality

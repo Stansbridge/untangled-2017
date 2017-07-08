@@ -1,6 +1,5 @@
 import pygame
 
-
 class Screen():
     def __init__(self, pygame_screen, font_path):
         self.pygame_screen = pygame_screen
@@ -9,6 +8,7 @@ class Screen():
             'small': pygame.font.Font(font_path, 35),
             'normal': pygame.font.Font(font_path, 55),
             'large': pygame.font.Font(font_path, 75),
+            'heading': pygame.font.Font(font_path, 95),
         }
 
 
@@ -26,18 +26,12 @@ class Menu(Screen):
 
         self.options = {
             'Play': {
-                'action': '',
-                'selected': True,
                 'pos': 0,
             },
             'Help': {
-                'action': '',
-                'selected': False,
                 'pos': 1,
             },
             'Quit': {
-                'action': '',
-                'selected': False,
                 'pos': 2,
             }
         }
@@ -46,14 +40,14 @@ class Menu(Screen):
         rendered_text_surface = font.render(text, False, colour)
         self.pygame_screen.blit(rendered_text_surface, pos)
 
-    def render(self):
+    def render(self, offset = (0, 0)):
         font = self.fonts['large']
 
         for key, value in self.options.items():
             if(value['pos'] == self.selected):
                 key = ">{0}".format(key)
 
-            self.render_text(font, key, (value['pos'], value['pos'] * 55))
+            self.render_text(font, key, (value['pos'] + offset[0], value['pos'] * 55 + offset[1]))
 
 
     def update(self, event):
@@ -66,6 +60,8 @@ class Menu(Screen):
         #         if int(event.value) > 0:
         #
 
+        from client import GameState
+
         if event.type == pygame.locals.KEYDOWN:
             if event.key == pygame.locals.K_UP:
                 self.selected -= 1
@@ -73,8 +69,15 @@ class Menu(Screen):
             elif event.key == pygame.locals.K_DOWN:
                 self.selected += 1
                 self.selected %= 3
+            elif event.key == pygame.locals.K_SPACE:
+                if(self.selected == 0):
+                    return GameState.PLAY
+                elif(self.selected == 1):
+                    return GameState.HELP
+                elif(self.selected == 2):
+                    return GameState.QUIT
 
-            # pygame.event.clear(pygame.locals.KEYDOWN)
+            pygame.event.clear(pygame.locals.KEYDOWN)
 
 
 
