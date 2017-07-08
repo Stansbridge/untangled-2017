@@ -80,8 +80,6 @@ class Menu(Screen):
                 elif(self.selected == 2):
                     return GameState.QUIT
 
-            pygame.event.clear(pygame.locals.KEYDOWN)
-
         return
 
 

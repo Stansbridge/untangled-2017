@@ -59,7 +59,6 @@ class GameClient():
         pygame.event.set_allowed([pygame.locals.QUIT,
             pygame.locals.JOYAXISMOTION,
             pygame.locals.KEYDOWN])
-        pygame.key.set_repeat(50, 50)
 
         # @TODO: Move tileset functionality from the Map into its own class.
         tileset = pygame.image.load("tileset.png").convert()
@@ -69,6 +68,11 @@ class GameClient():
     def set_state(self, new_state):
         if(new_state and new_state != self.game_state):
             self.game_state = new_state
+
+            if(self.game_state.value == GameState.PLAY.value):
+                pygame.key.set_repeat(50, 50)
+            else:
+                pygame.key.set_repeat(0, 0)
 
     def run(self):
         running = True
@@ -90,6 +94,9 @@ class GameClient():
                 elif(self.game_state.value == GameState.QUIT.value):
                     running = False
                     break
+                elif(self.game_state.value == GameState.HELP.value):
+                    print("Help menu option pressed")
+                    self.game_state = GameState.MENU
                 else:
                     # handle inputs
                     me = self.players.me
