@@ -1,4 +1,7 @@
 import pygame
+import time
+
+from enum import Enum
 
 class Screen():
     def __init__(self, pygame_screen, font_path):
@@ -18,12 +21,17 @@ class Screen():
     def update(self, event):
         return
 
+class MenuState(Enum):
+    CHOICE = 0
+    CHAR_SETUP = 1
+
 class Menu(Screen):
     def __init__(self, pygame_screen, font_path):
         super().__init__(pygame_screen, font_path)
 
         self.selected = 0
-
+        self.state = MenuState.CHOICE
+        self.char_name = ''
         self.options = {
             'Play': {
                 'pos': 0,
@@ -45,13 +53,18 @@ class Menu(Screen):
         header_font = self.fonts['heading']
 
         self.render_text(header_font, "Untangled 2017", (offset[0] - 125, 300), (100, 200,100))
+        if(self.state == MenuState.CHOICE):
+            for key, value in self.options.items():
+                if(value['pos'] == self.selected):
+                    key = ">{0}".format(key)
 
-        for key, value in self.options.items():
-            if(value['pos'] == self.selected):
-                key = ">{0}".format(key)
-
-            self.render_text(font, key, (value['pos'] + offset[0], value['pos'] * 55 + offset[1]))
-
+                self.render_text(font, key, (value['pos'] + offset[0], value['pos'] * 55 + offset[1]))
+        elif(self.state == MenuState.CHAR_SETUP):
+            self.render_text(font, 'Name: ', (offset[0] - 125, offset[1]))
+            if(int(time.time()) % 2):
+                self.render_text(font, self.char_name + '_', (offset[0], offset[1]))
+            else:
+                self.render_text(font, self.char_name, (offset[0], offset[1]))
 
     def update(self, event):
         # Update menu state based off of key press
@@ -66,6 +79,12 @@ class Menu(Screen):
         from client import GameState
 
         if event.type == pygame.locals.KEYDOWN:
+            if(self.state == MenuState.CHAR_SETUP):
+                if(event.key == pygame.locals.K_BACKSPACE):
+                    self.char_name = self.char_name[:-1]
+                elif(event.key < 122 and event.key != 13):
+                    self.char_name += chr(event.key)
+
             if event.key == pygame.locals.K_UP:
                 self.selected -= 1
                 self.selected %= 3
@@ -74,7 +93,8 @@ class Menu(Screen):
                 self.selected %= 3
             elif event.key == pygame.locals.K_SPACE:
                 if(self.selected == 0):
-                    return GameState.PLAY
+                    self.state = MenuState.CHAR_SETUP
+                    return GameState.MENU
                 elif(self.selected == 1):
                     return GameState.HELP
                 elif(self.selected == 2):
