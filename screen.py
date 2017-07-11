@@ -31,6 +31,7 @@ class Menu(Screen):
 
         self.selected = 0
         self.state = MenuState.CHOICE
+        self.ticker = 0.0
         self.char_name = ''
         self.options = {
             'Play': {
@@ -52,6 +53,9 @@ class Menu(Screen):
         font = self.fonts['large']
         header_font = self.fonts['heading']
 
+        self.ticker += 2
+        self.ticker %= 100
+
         self.render_text(header_font, "Untangled 2017", (offset[0] - 125, 300), (100, 200,100))
         if(self.state == MenuState.CHOICE):
             for key, value in self.options.items():
@@ -61,7 +65,7 @@ class Menu(Screen):
                 self.render_text(font, key, (value['pos'] + offset[0], value['pos'] * 55 + offset[1]))
         elif(self.state == MenuState.CHAR_SETUP):
             self.render_text(font, 'Name: ', (offset[0] - 125, offset[1]))
-            if(int(time.time()) % 2):
+            if(self.ticker > 50):
                 self.render_text(font, self.char_name + '_', (offset[0], offset[1]))
             else:
                 self.render_text(font, self.char_name, (offset[0], offset[1]))
