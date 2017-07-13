@@ -86,7 +86,7 @@ class GameClient():
                 if(self.game_state.value == GameState.MENU.value):
                     self.menu.render((self.map.screen_size[0] * 0.45, self.map.screen_size[1]*0.4))
                     for event in pygame.event.get():
-                        if event.type == pygame.QUIT or event.type == pygame.locals.QUIT or event.key == pygame.locals.K_ESCAPE:
+                        if event.type == pygame.QUIT or event.type == pygame.locals.QUIT:
                             running = False
                             break
 
@@ -104,7 +104,7 @@ class GameClient():
                         if event.type == pygame.QUIT or event.type == pygame.locals.QUIT:
                             running = False
                             break
-                        elif event.key == pygame.locals.K_ESCAPE:
+                        elif event.type == pygame.locals.KEYDOWN and event.key == pygame.locals.K_ESCAPE:
                             self.set_state(GameState.MENU)
                         # JOYAXISMOTION triggers when the value changes
                         # We need to retain the direction value each tick

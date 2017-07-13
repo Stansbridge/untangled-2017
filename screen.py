@@ -71,38 +71,42 @@ class Menu(Screen):
                 self.render_text(font, self.char_name, (offset[0], offset[1]))
 
     def update(self, event):
-        # Update menu state based off of key press
-        # if event.type == pygame.locals.JOYAXISMOTION:
-        #     # up/down
-        #     if event.axis == 1:
-        #         if int(event.value) < 0:
-        #
-        #         if int(event.value) > 0:
-        #
-
+        # Update menu state based off of key press or joystick
         from client import GameState
 
-        if event.type == pygame.locals.KEYDOWN:
-            if(self.state == MenuState.CHAR_SETUP):
-                if(event.key == pygame.locals.K_BACKSPACE):
-                    self.char_name = self.char_name[:-1]
-                elif(event.key < 122 and event.key != 13):
-                    self.char_name += chr(event.key)
-
+        if event.type == pygame.locals.JOYAXISMOTION:
+            # up/down
+            if event.axis == 1:
+                if int(event.value) < 0:
+                    self.selected -= 1
+                    self.selected %= 3  
+                if int(event.value) > 0:
+                    self.selected += 1
+                    self.selected %= 3    
+        elif event.type == pygame.locals.KEYDOWN:
             if event.key == pygame.locals.K_UP:
                 self.selected -= 1
                 self.selected %= 3
             elif event.key == pygame.locals.K_DOWN:
                 self.selected += 1
                 self.selected %= 3
-            elif event.key == pygame.locals.K_SPACE:
+            elif event.key == pygame.locals.K_SPACE or event.key == 54354:
                 if(self.selected == 0):
-                    self.state = MenuState.CHAR_SETUP
-                    return GameState.MENU
+                    # Leaving character name screen out for now
+                    # self.state = MenuState.CHAR_SETUP
+                    # return GameState.MENU
+                    return GameState.PLAY
                 elif(self.selected == 1):
                     return GameState.HELP
                 elif(self.selected == 2):
                     return GameState.QUIT
+
+        if(self.state == MenuState.CHAR_SETUP):
+            if(event.type == pygame.locals.KEYDOWN):
+                if(event.key == pygame.locals.K_BACKSPACE):
+                    self.char_name = self.char_name[:-1]
+                elif(event.key < 122 and event.key != 13):
+                    self.char_name += chr(event.key)
 
         return
 
