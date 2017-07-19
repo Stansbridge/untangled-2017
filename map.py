@@ -32,7 +32,7 @@ class Tileset():
         self.tiles = {}
         self.load_tiles()
 
-    def get_tile(self, id):
+    def get_tile_by_id(self, id):
         return self.tiles[id]
 
     def get_attributes(self, id):
@@ -79,7 +79,9 @@ class Level():
         return self.grid[y][x]
 
     def get_tile(self, x, y):
-        return self.tileset.get_tile(self.get_grid_tile(x, y))
+        return self.tileset.get_tile_by_id(
+            self.get_grid_tile(x, y)
+        )
 
 class ProceduralLevel(Level):
     def __init__(self, id, tileset, seed):
@@ -116,7 +118,7 @@ class Map():
         self.offset = {
             'x': 0,
             'y': 0
-                }
+        }
 
 
     def set_centre_player(self, player):
@@ -127,7 +129,7 @@ class Map():
         return (self.screen_size[0] * 0.5, self.screen_size[1] * 0.5)
 
     def render_grid_tile(self, x, y, id):
-        tile = self.level.get_tile(x, y)
+        tile = self.level.tileset.get_tile_by_id(id)
         self.screen.blit(tile.subsurface, (x * self.dimension[0], y * self.dimension[1]))
 
     def get_tile_attributes(self, x, y):
@@ -165,4 +167,4 @@ class Map():
                 if(not screen_clip_rect.contains(tile_clip_rect)):
                     continue
 
-                self.render_grid_tile(int(final_x), int(final_y), tile_id)
+                self.render_grid_tile(final_x, final_y, tile_id)
