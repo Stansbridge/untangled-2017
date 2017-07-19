@@ -14,7 +14,7 @@ from pyre import zhelper
 from collections import namedtuple
 from enum import Enum
 
-from map import Map
+from map import *
 from network import Network
 from player import *
 
@@ -22,12 +22,11 @@ white = (255,255,255)
 black = (0,0,0)
 red = (255, 0, 0)
 
-
 class GameClient():
     def __init__(self):
         self.network = Network()
         self.setup_pygame()
-        self.players = PlayerManager(Player(self.screen, self.map, (0, 0), (32, 32)))
+        self.players = PlayerManager(Player(self.screen, self.map, (0, 0), (16, 16)))
         self.map.set_centre_player(self.players.me) 
 
     def setup_pygame(self, width=1024, height=1024):
@@ -45,10 +44,13 @@ class GameClient():
             pygame.locals.KEYDOWN])
         pygame.key.set_repeat(50, 50)
 
-        tileset = pygame.image.load("tileset.png").convert()
+        self.levels = {
+                "main": ProceduralLevel("main", Tileset(pygame.image.load("tileset.png").convert(), (64, 64), {
+                        6: TileAttributes.COLLIDE.value
+                    }, (16, 16)), 34234234235232343)
+                }
         
-        self.map = Map(self.screen, tileset, (32, 32), (64, 64))
-        self.map.init_grid();
+        self.map = Map(self.screen, self.levels.get("main"), (16, 16))
 
     def run(self):
         running = True
@@ -63,7 +65,7 @@ class GameClient():
                 # handle inputs
                 me = self.players.me
                 for event in pygame.event.get():
-                    if event.type == pygame.QUIT or event.type == pygame.locals.QUIT or event.key == pygame.locals.K_ESCAPE:
+                    if event.type == pygame.QUIT or event.type == pygame.locals.QUIT:
                         running = False
                         break
                     # JOYAXISMOTION triggers when the value changes

@@ -73,12 +73,12 @@ class Player():
         tile_attribs = self.map.get_tile_attributes(tmp_x, tmp_y)
 
         # Import Tiles information Enum.
-        from map import Tiles
+        from map import TileAttributes
 
         # TODO: Prevent the player from moving beyond the bounds of the map.
 
         # If the tile_attribs includes "Tiles.COLLIDE" record this as a collision.
-        if(tile_attribs & Tiles.COLLIDE.value):
+        if(tile_attribs & TileAttributes.COLLIDE.value):
             collision = True
 
         # If a collision has occurred return before the player has moved.
