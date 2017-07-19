@@ -14,7 +14,7 @@ from pyre import zhelper
 from collections import namedtuple
 from enum import Enum
 
-from map import Map
+from map import *
 from network import Network
 from player import *
 from screen import Menu
@@ -22,7 +22,6 @@ from screen import Menu
 white = (255,255,255)
 black = (0,0,0)
 red = (255, 0, 0)
-
 
 class GameState(Enum):
     MENU = 0
@@ -37,7 +36,7 @@ class GameClient():
     def __init__(self):
         self.network = Network()
         self.setup_pygame()
-        self.players = PlayerManager(Player(self.screen, self.map, (0, 0), (32, 32)))
+        self.players = PlayerManager(Player(self.screen, self.map))
         self.map.set_centre_player(self.players.me) 
 
         self.menu = Menu(self.screen, 'alterebro-pixel-font.ttf')
@@ -60,10 +59,13 @@ class GameClient():
             pygame.locals.JOYAXISMOTION,
             pygame.locals.KEYDOWN])
 
-        # @TODO: Move tileset functionality from the Map into its own class.
-        tileset = pygame.image.load("tileset.png").convert()
-        self.map = Map(self.screen, tileset, (32, 32), (64, 64))
-        self.map.init_grid()
+        self.levels = {
+              "main": ProceduralLevel("main", Tileset(pygame.image.load("tileset.png").convert(), (64, 64), {
+                6: TileTypes.COLLIDE.value
+                }, (32, 32)), 4343438483844)
+            }
+
+        self.map = Map(self.screen, self.levels.get("main"), (32, 32))
 
     def set_state(self, new_state):
         if(new_state and new_state != self.game_state):
