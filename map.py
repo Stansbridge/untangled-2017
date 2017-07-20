@@ -1,6 +1,7 @@
 import pygame
 import pygame.locals
 
+from functools import reduce
 from opensimplex import OpenSimplex
 from enum import Enum
 
@@ -17,10 +18,21 @@ class TileTypes(Enum):
     WATER = 8
 
 class Tile():
-    def __init__(self, id, attributes, subsurface):
-        self.id = id
+    def __init__(self, attributes, subsurface):
         self.attributes = attributes
         self.subsurface = subsurface
+
+def gridTileFactory (*tiles):
+    def processSurfaces(x, y):
+        x = x.copy()
+        y = y.copy()
+        x.blit(y, (0, 0))
+        return x
+
+    tiles = list(tiles)
+    subsurface = reduce(processSurfaces, [t.subsurface for t in tiles])
+    attributes = reduce(lambda x, y: x | y, [t.attributes for t in tiles])
+    return Tile(attributes, subsurface)
 
 class Tileset():
     def __init__(self, tileset, dimension, attributes, world_dimension):
@@ -68,12 +80,21 @@ class Tileset():
         for i in range(w):
             for j in range(h):
                 id = self.find_id(i, j)
-                self.tiles[id] = Tile(id, self.get_attributes(id), self.find_subsurface(id))
+                if id == 6:
+                    self.tiles[id] = gridTileFactory(
+                            Tile(self.get_attributes(id), self.find_subsurface(id)),
+                            Tile(self.get_attributes(10), self.find_subsurface(10)))
+                else:
+                    self.tiles[id] = Tile(self.get_attributes(id), self.find_subsurface(id))
 
 class Level():
     def __init__(self, id, tileset):
         self.id = id
         self.tileset = tileset
+        self.load_grid()
+
+    def load_grid(self):
+        self.grid = [[]]
 
     def get_grid_tile(self, x, y):
         return self.grid[y][x]
@@ -85,9 +106,8 @@ class Level():
 
 class ProceduralLevel(Level):
     def __init__(self, id, tileset, seed):
-        Level.__init__(self, id, tileset)
         self.openSimplex = OpenSimplex(seed)
-        self.load_grid()
+        Level.__init__(self, id, tileset)
     
     def load_grid(self, width = 500, height = 500):
         self.width = width
