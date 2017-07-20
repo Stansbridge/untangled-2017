@@ -40,7 +40,7 @@ class Player():
         self.ready = True
 
     def render(self):
-        centre = self.map.get_centre
+        centre = self.map.get_centre()
         font = pygame.font.Font(None, 30)
         font.set_bold(True)
         box = font.render(self.name, False, (255, 255, 255))
