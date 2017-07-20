@@ -99,11 +99,6 @@ class Level():
     def get_grid_tile(self, x, y):
         return self.grid[y][x]
 
-    def get_tile(self, x, y):
-        return self.tileset.get_tile_by_id(
-            self.get_grid_tile(x, y)
-        )
-
 class ProceduralLevel(Level):
     def __init__(self, id, tileset, seed):
         self.openSimplex = OpenSimplex(seed)
@@ -125,7 +120,7 @@ class ProceduralLevel(Level):
         else:
             id = 2
 
-        return id
+        return self.tileset.get_tile_by_id(id)
 
 class Map():
     def __init__(self, screen, level, world_dimension = (32, 32)):
@@ -146,8 +141,7 @@ class Map():
     def get_centre(self):
         return (self.screen_size[0] * 0.5, self.screen_size[1] * 0.5)
 
-    def render_grid_tile(self, x, y, id):
-        tile = self.level.tileset.get_tile_by_id(id)
+    def render_grid_tile(self, x, y, tile):
         self.screen.blit(tile.subsurface, (x * self.dimension[0], y * self.dimension[1]))
 
     def get_tile_attributes(self, x, y):
@@ -155,7 +149,7 @@ class Map():
         adjusted_y = y // self.dimension[1]
 
         # Lookup for the tile_id at the provided x, y coordinates.
-        tile = self.level.get_tile(adjusted_x, adjusted_y)
+        tile = self.level.get_grid_tile(adjusted_x, adjusted_y)
         return tile.attributes
 
     def render(self):
@@ -178,11 +172,11 @@ class Map():
             if(not screen_clip_rect.contains(tile_clip_rect)):
                 continue
 
-            for x, tile_id in enumerate(self.level.grid[y]):
+            for x, tile in enumerate(self.level.grid[y]):
                 final_x = x + self.offset['x']
                 tile_clip_rect = Rect((final_x, final_y), (1, 1))
 
                 if(not screen_clip_rect.contains(tile_clip_rect)):
                     continue
 
-                self.render_grid_tile(final_x, final_y, tile_id)
+                self.render_grid_tile(final_x, final_y, tile)
