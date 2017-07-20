@@ -108,8 +108,6 @@ class ProceduralLevel(Level):
         return id
 
 class Map():
-    seed = 34234234235232343 #lmao keyboard mashing ftw
-
     def __init__(self, screen, level, world_dimension = (32, 32)):
         self.screen = screen
         self.level = level

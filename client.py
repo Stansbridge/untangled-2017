@@ -39,11 +39,10 @@ class GameClient():
         self.players = PlayerManager(Player(self.screen, self.map))
         self.map.set_centre_player(self.players.me) 
 
-        self.menu = Menu(self.screen, 'alterebro-pixel-font.ttf')
+        self.menu = Menu(self.screen, 'assets/fonts/alterebro-pixel-font.ttf')
 
     def setup_pygame(self, width=1024, height=1024):
         self.screen = pygame.display.set_mode((width, height), pygame.HWSURFACE)
-        self.player_image = pygame.image.load("sprite.png").convert_alpha()
 
         # Initialise fonts.
         pygame.font.init()
@@ -60,7 +59,7 @@ class GameClient():
             pygame.locals.KEYDOWN])
 
         self.levels = {
-              "main": ProceduralLevel("main", Tileset(pygame.image.load("tileset.png").convert(), (64, 64), {
+              "main": ProceduralLevel("main", Tileset(pygame.image.load('assets/tilesets/main.png').convert(), (64, 64), {
                 6: TileTypes.COLLIDE.value
                 }, (32, 32)), 4343438483844)
             }
@@ -162,7 +161,6 @@ class GameClient():
 
                     for playerUUID, player in self.players.others.items():
                         try:
-                            # self.screen.blit(self.player_image, player.get_position())
                             player.render()
                         except PlayerException as e:
                             # PlayerException due to no initial position being set for that player
