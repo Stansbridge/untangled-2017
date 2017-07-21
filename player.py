@@ -3,6 +3,7 @@ from enum import Enum
 import math
 import random
 import pygame
+import configparser
 from pygame.rect import Rect
 
 
@@ -25,6 +26,7 @@ class Player():
         self.size = size
         self.step = self.size[0]
         self.colour = colour
+        self.name = ''
 
         if len(position) > 0:
             self.initial_position = position
@@ -32,6 +34,43 @@ class Player():
 
     def __raiseNoPosition(self):
         raise PlayerException({"message": "Player does not have a position set", "player": self})
+
+
+    def save_to_config(self):
+        config = configparser.ConfigParser()
+
+        config['Player'] = {}
+        config['Player']['name'] = self.name
+        config['Player']['x'] = str(self.x)
+        config['Player']['y'] = str(self.y)
+
+        with open('player_save', 'w') as configfile:
+            config.write(configfile)
+
+        return
+
+    def load_from_config(self):
+        config = configparser.ConfigParser()
+        config.read('player_save')
+
+        if 'Player' in config:
+            player_save_info = config['Player']
+
+            self.set_name(player_save_info['name'])
+            self.set_position(
+                (
+                    int(player_save_info['x']),
+                    int(player_save_info['y'])
+                )
+            )
+
+            return True
+
+        return False
+
+    def set_name(self, name, save = False):
+        self.name = name
+        if save: self.save_to_config()
 
     def set_position(self, position):
         self.x, self.y = position

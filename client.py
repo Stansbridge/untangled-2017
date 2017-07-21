@@ -17,7 +17,7 @@ from enum import Enum
 from map import Map
 from network import Network
 from player import *
-from screen import Menu
+from screen import MainMenu
 
 white = (255,255,255)
 black = (0,0,0)
@@ -40,7 +40,7 @@ class GameClient():
         self.players = PlayerManager(Player(self.screen, self.map, (0, 0), (32, 32)))
         self.map.set_centre_player(self.players.me) 
 
-        self.menu = Menu(self.screen, 'alterebro-pixel-font.ttf')
+        self.menu = MainMenu(self.screen, 'alterebro-pixel-font.ttf', self.players)
 
     def setup_pygame(self, width=1024, height=1024):
         self.screen = pygame.display.set_mode((width, height), pygame.HWSURFACE)
