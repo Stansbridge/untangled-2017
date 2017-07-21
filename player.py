@@ -5,14 +5,10 @@ import random
 import pygame
 from pygame.rect import Rect
 
+from constants import TileTypes
+from constants import Movement
 
-class Movement(Enum):
-    UP = 1
-    RIGHT = 2
-    DOWN = 3
-    LEFT = 4
 Position = namedtuple('Position', ['x', 'y'])
-
 class PlayerException(Exception):
     pass
 
@@ -72,13 +68,10 @@ class Player():
 
         tile_attribs = self.map.get_tile_attributes(tmp_x, tmp_y)
 
-        # Import TileTypes information Enum.
-        from map import TileTypes
-
         # TODO: Prevent the player from moving beyond the bounds of the map.
 
         # If the tile_attribs includes "TileTypes.COLLIDE" record this as a collision.
-        if(tile_attribs & TileTypes.COLLIDE.value):
+        if(tile_attribs.mask & TileTypes.COLLIDE.value):
             collision = True
 
         # If a collision has occurred return before the player has moved.

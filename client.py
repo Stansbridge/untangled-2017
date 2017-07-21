@@ -12,23 +12,12 @@ import uuid
 from pyre import Pyre
 from pyre import zhelper
 from collections import namedtuple
-from enum import Enum
 
 from map import *
 from network import Network
 from player import *
 from screen import Menu
-
-white = (255,255,255)
-black = (0,0,0)
-red = (255, 0, 0)
-
-class GameState(Enum):
-    MENU = 0
-    PLAY = 1
-    HELP = 2
-    CHARACTER = 3
-    QUIT = 4
+from constants import GameState, Colours, TileDefinitions
 
 class GameClient():
     game_state = GameState.MENU
@@ -60,7 +49,12 @@ class GameClient():
 
         self.levels = {
               "main": ProceduralLevel("main", Tileset(pygame.image.load('assets/tilesets/main.png').convert(), (64, 64), {
-                6: TileTypes.COLLIDE.value
+                  6: TileTypes.COLLIDE.value,
+                  2: TileTypes.DEFAULT.value
+                }, {
+                  6: [TileDefinitions.BLOCK.value],
+                  2: [TileDefinitions.MUD.value],
+                  83: [TileDefinitions.LADDER.value]
                 }, (32, 32)), 4343438483844)
             }
 
@@ -82,7 +76,7 @@ class GameClient():
 
         try:
             while running:
-                self.screen.fill((white))
+                self.screen.fill((Colours.WHITE.value))
                 clock.tick(tickspeed)
                 if(self.game_state.value == GameState.MENU.value):
                     self.menu.render((self.map.screen_size[0] * 0.45, self.map.screen_size[1]*0.4))

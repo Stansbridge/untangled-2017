@@ -1,21 +1,10 @@
 import pygame
 import pygame.locals
-
 from functools import reduce
 from opensimplex import OpenSimplex
-from enum import Enum
 
 from player import *
-
-'''
-TileTypes represents the actions which a tile is able to inflict upon a player.
-
-'''
-class TileTypes(Enum):
-    COLLIDE = 1
-    SPIKES = 2
-    LAVA = 4
-    WATER = 8
+from constants import TileTypes, TileDefinitions
 
 class Tile():
     def __init__(self, attributes, subsurface):
@@ -31,15 +20,22 @@ def gridTileFactory (*tiles):
 
     tiles = list(tiles)
     subsurface = reduce(processSurfaces, [t.subsurface for t in tiles])
-    attributes = reduce(lambda x, y: x | y, [t.attributes for t in tiles])
-    return Tile(attributes, subsurface)
+    mask = reduce(lambda x, y: x | y, [t.attributes.mask for t in tiles])
+    definitions = reduce(lambda x, y: x + y, [t.attributes.definitions for t in tiles])
+    return Tile(TileAttributes(mask, definitions), subsurface)
+
+class TileAttributes():
+    def __init__(self, mask, definitions):
+        self.mask = mask;
+        self.definitions = definitions
 
 class Tileset():
-    def __init__(self, tileset, dimension, attributes, world_dimension):
+    def __init__(self, tileset, dimension, masks, definitions, world_dimension):
         self.tileset = tileset
         self.width, self.height = tileset.get_size()
         self.dimension = dimension
-        self.attributes = attributes
+        self.masks = masks
+        self.definitions = definitions
         self.world_dimension = world_dimension
         self.tiles = {}
         self.load_tiles()
@@ -47,8 +43,11 @@ class Tileset():
     def get_tile_by_id(self, id):
         return self.tiles[id]
 
-    def get_attributes(self, id):
-        return self.attributes.get(id, 0)
+    def get_mask(self, id):
+        return self.masks.get(id, TileTypes.DEFAULT.value)
+
+    def get_definition(self, id):
+        return self.definitions.get(id, [TileDefinitions.DEFAULT.value])
 
     def find_position(self, id):
         x = id % (self.width // self.dimension[0])
@@ -80,12 +79,7 @@ class Tileset():
         for i in range(w):
             for j in range(h):
                 id = self.find_id(i, j)
-                if id == 6:
-                    self.tiles[id] = gridTileFactory(
-                            Tile(self.get_attributes(id), self.find_subsurface(id)),
-                            Tile(self.get_attributes(10), self.find_subsurface(10)))
-                else:
-                    self.tiles[id] = Tile(self.get_attributes(id), self.find_subsurface(id))
+                self.tiles[id] = Tile(TileAttributes(self.get_mask(id), self.get_definition(id)), self.find_subsurface(id))
 
 class Level():
     def __init__(self, id, tileset):
@@ -112,6 +106,7 @@ class ProceduralLevel(Level):
                     self.generate_grid_tile(i, j) for i in range(width)
                     ] for j in range(height)
                 ]
+        self.grid = self.spawn_example_ladder(self.grid)
 
     def generate_grid_tile(self, x, y):
         noise = self.openSimplex.noise2d(x / 10, y / 10)
@@ -121,6 +116,22 @@ class ProceduralLevel(Level):
             id = 2
 
         return self.tileset.get_tile_by_id(id)
+
+    def spawn_example_ladder(self, grid):
+        spawnable = 1;
+        for y, row in enumerate(grid):
+            for x, tile in enumerate(grid[y]):
+                if spawnable > 0:
+                    temp_y = y
+                    temp_x = x
+                    
+                    criteria = True
+                    if criteria:
+                        existing_tile = grid[y][x]
+                        grid[y][x] = gridTileFactory(existing_tile,
+                            Tile(TileAttributes(self.tileset.get_mask(83), self.tileset.get_definition(83)), self.tileset.find_subsurface(83)))
+                        spawnable -= 1
+        return grid
 
 class Map():
     def __init__(self, screen, level, world_dimension = (32, 32)):
