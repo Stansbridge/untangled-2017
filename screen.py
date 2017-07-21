@@ -90,16 +90,22 @@ class Menu(Screen):
             elif event.key == pygame.locals.K_DOWN:
                 self.selected += 1
                 self.selected %= 3
-            elif event.key == pygame.locals.K_SPACE or event.key == 54354:
+            elif event.key == pygame.locals.K_SPACE:
                 if(self.selected == 0):
                     # Leaving character name screen out for now
-                    # self.state = MenuState.CHAR_SETUP
-                    # return GameState.MENU
-                    return GameState.PLAY
+                    self.state = MenuState.CHAR_SETUP
+                    return GameState.MENU
                 elif(self.selected == 1):
                     return GameState.HELP
                 elif(self.selected == 2):
                     return GameState.QUIT
+            elif event.key == pygame.locals.K_RETURN:
+                if self.state == MenuState.CHAR_SETUP:
+                    # set player name to new name.
+                    return GameState.PLAY
+            elif event.key == pygame.locals.K_ESCAPE:
+                if self.state == MenuState.CHAR_SETUP:
+                    self.state = MenuState.CHOICE
 
         if(self.state == MenuState.CHAR_SETUP):
             if(event.type == pygame.locals.KEYDOWN):
