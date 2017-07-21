@@ -135,6 +135,7 @@ class Player():
 class PlayerManager():
     def __init__(self, me):
         self.me = me
+        self.me.load_from_config()
         self.others = {}
 
     def set(self, players):

@@ -34,7 +34,7 @@ class MainMenu(Screen):
         self.state = MenuState.CHOICE
         self.player_manager = player_manager
         self.ticker = 0.0
-        self.char_name = ''
+        self.char_name = player_manager.me.name
         self.info_message = ''
 
         self.main_options = {
