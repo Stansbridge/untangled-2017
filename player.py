@@ -88,15 +88,14 @@ class Player():
         font.set_bold(True)
         box = font.render(self.name, False, (255, 255, 255))
 
-        for b in range(len(self.spells)): # Calculate position increments of projectile 
-            self.spells[b][0]+=10
+        # Check if the user has cast a spell.
+        if self.spells:
+            s = Spell(centre, self)
+            s.render(self.spells)
 
         if(self.is_centre):
             self.screen.blit(box, (centre[0], centre[1] - 20)) # Draws name above centre player
             pygame.draw.rect(self.screen, self.colour, Rect(centre, self.size))
-
-            for spell in self.spells: # Draw projectiles
-                pygame.draw.rect(self.screen, (0,0,0), Rect((spell[0],spell[1]), (8,8)))
         else:
             offset_centre = (
                 self.x - self.map.centre_player.x + centre[0],
@@ -152,7 +151,25 @@ class Player():
 
         if action == Action.SPELL:
             self.spells.append([centre[0], centre[1]])
+        elif action == Action.SWIPE:
+            #TODO
+            return
 
+class Spell():
+    def __init__(self, position, player, size=(8,8), colour=(0,0,0)):
+        self.position = position
+        self.player = player
+        self.size = size
+        self.colour = colour
+
+    def render(self,spells):
+        for b in range(len(spells)): # Calculate position increments of projectile
+            spells[b][0]+=10
+        for spell in spells:
+            pygame.draw.rect(self.player.screen, self.colour, Rect((spell[0],spell[1]), self.size))
+
+    def hitTarget(self,player): # Return if the spell has hit another player.
+        return self.rect.colliderect(player.map.get_tile_attributes(player.x, player.y))
 
 class PlayerManager():
     def __init__(self, me):
