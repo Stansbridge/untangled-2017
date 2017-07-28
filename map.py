@@ -133,7 +133,6 @@ class Map():
             'y': 0
         }
 
-
     def set_centre_player(self, player):
         player.is_centre = True
         self.centre_player = player
