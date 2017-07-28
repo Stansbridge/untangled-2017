@@ -133,6 +133,7 @@ class GameClient():
                                 me.move(Movement.RIGHT)
                             elif event.key == pygame.locals.K_RETURN:
                                 me.attack(Action.SPELL)
+                                self.network.node.shout("world:combat", bson.dumps(me.cast_spell.get_position()._asdict()))
                             pygame.event.clear(pygame.locals.KEYDOWN)
 
                     self.map.render()
@@ -148,10 +149,14 @@ class GameClient():
 
                                 if event.group == "world:position":
                                     new_position = bson.loads(event.msg[0])
-                                    network_player = self.players.get(event.peer_uuid)
+                                    network_player = self.players.get(event.peer_uuid
+                                if event.group == "world:combat":
+                                    new_spell_position = bson.loads(event.msg[0])
+                                    # Load position of spell
+                                if network_player:
+                                    network_player.set_position(Position(**new_position))
+                                    # Set new position for spell
 
-                                    if network_player:
-                                        network_player.set_position(Position(**new_position))
                         except Exception as e:
                             print(e)
                             pass
@@ -159,7 +164,6 @@ class GameClient():
                     # if there are other peers we can start sending to groups
                     if self.players.others:
                         self.network.node.shout("world:position", bson.dumps(me.get_position()._asdict()))
-
                     for playerUUID, player in self.players.others.items():
                         try:
                             player.render()

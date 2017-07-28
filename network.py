@@ -8,6 +8,7 @@ class Network():
         self.node.set_header("HELLO", "ABC")
         self.node.start()
         self.node.join("world:position")
+        self.node.join("world:combat")
 
         self.poller = zmq.Poller()
         self.poller.register(self.node.socket(), zmq.POLLIN)
@@ -26,5 +27,3 @@ class Network():
         if self.node.socket() in changes and changes[self.node.socket()] == zmq.POLLIN:
             events = self.node.recent_events()
             return events
-
-

@@ -31,7 +31,7 @@ class Player():
         self.step = self.size[0]
         self.colour = colour
         self.name = name
-        self.spells = []
+        self.cast_spell = None
 
         if len(position) > 0:
             self.initial_position = position
@@ -89,9 +89,8 @@ class Player():
         box = font.render(self.name, False, (255, 255, 255))
 
         # Check if the user has cast a spell.
-        if self.spells:
-            s = Spell(centre, self)
-            s.render(self.spells)
+        if self.cast_spell is not None:
+            self.cast_spell.render()
 
         if(self.is_centre):
             self.screen.blit(box, (centre[0], centre[1] - 20)) # Draws name above centre player
@@ -150,25 +149,35 @@ class Player():
         centre = self.map.get_centre()
 
         if action == Action.SPELL:
-            self.spells.append([centre[0], centre[1]])
+            self.cast_spell = Spell(self)
         elif action == Action.SWIPE:
             #TODO
             return
 
 class Spell():
-    def __init__(self, position, player, size=(8,8), colour=(0,0,0)):
-        self.position = position
+    def __init__(self, player, size=(8,8), colour=(0,0,0)):
         self.player = player
         self.size = size
         self.colour = colour
+        self.position = []
 
-    def render(self,spells):
-        for b in range(len(spells)): # Calculate position increments of projectile
-            spells[b][0]+=10
-        for spell in spells:
-            pygame.draw.rect(self.player.screen, self.colour, Rect((spell[0],spell[1]), self.size))
+        centre = player.map.get_centre()
+        self.position.append([centre[0], centre[1]])
 
-    def hitTarget(self,player): # Return if the spell has hit another player.
+    def render(self):
+        for b in range(len(self.position)): # Calculate position increments of projectile
+            self.position[b][0]+=10
+        for p in self.position:
+            pygame.draw.rect(self.player.screen, self.colour, Rect((p[0],p[1]), self.size))
+
+    def get_position(self):
+        for p in self.position:
+            return Position(p[0],p[1])
+
+    def set_position(self, position):
+        self.x, self.y = position
+
+    def hit_target(self,player): # Return if the spell has hit another player.
         return self.rect.colliderect(player.map.get_tile_attributes(player.x, player.y))
 
 class PlayerManager():
