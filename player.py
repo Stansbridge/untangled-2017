@@ -18,7 +18,7 @@ class PlayerException(Exception):
     pass
 
 class Player():
-    def __init__(self, screen, map, position=(0, 0), size=(32, 32), colour=(255, 255, 255)):
+    def __init__(self, screen, map, position=(0, 0), size=(32, 32), colour=(255, 255, 255), name = "Name"):
         self.screen = screen
         self.map = map
         self.ready = False
@@ -26,7 +26,7 @@ class Player():
         self.size = size
         self.step = self.size[0]
         self.colour = colour
-        self.name = ''
+        self.name = name
 
         if len(position) > 0:
             self.initial_position = position
@@ -79,15 +79,20 @@ class Player():
 
     def render(self):
         centre = self.map.get_centre()
+        font = pygame.font.Font(None, 30)
+        font.set_bold(True)
+        box = font.render(self.name, False, (255, 255, 255))
+
 
         if(self.is_centre):
+            self.screen.blit(box, (centre[0], centre[1] - 20)) # Draws name above centre player
             pygame.draw.rect(self.screen, self.colour, Rect(centre, self.size))
         else:
             offset_centre = (
                 self.x - self.map.centre_player.x + centre[0],
                 self.y - self.map.centre_player.y + centre[1]
             )
-
+            self.screen.blit(box, (offset_centre[0], offset_centre[1] - 20)) # Draws name above another player
             pygame.draw.rect(self.screen, self.colour, Rect(offset_centre, self.size))
 
 
