@@ -37,7 +37,7 @@ class GameClient():
         self.network = Network()
         self.setup_pygame()
         self.players = PlayerManager(Player(self.screen, self.map))
-        self.map.set_centre_player(self.players.me) 
+        self.map.set_centre_player(self.players.me)
         self.menu = MainMenu(self.screen, 'assets/fonts/alterebro-pixel-font.ttf', self.players)
 
     def setup_pygame(self, width=1024, height=1024):
@@ -131,6 +131,8 @@ class GameClient():
                                 me.move(Movement.LEFT)
                             elif event.key == pygame.locals.K_RIGHT:
                                 me.move(Movement.RIGHT)
+                            elif event.key == pygame.locals.K_RETURN:
+                                me.attack(Action.SPELL)
                             pygame.event.clear(pygame.locals.KEYDOWN)
 
                     self.map.render()

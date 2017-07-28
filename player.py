@@ -14,6 +14,10 @@ class Movement(Enum):
     LEFT = 4
 Position = namedtuple('Position', ['x', 'y'])
 
+class Action(Enum):
+    SPELL = 1
+    SWIPE = 2
+
 class PlayerException(Exception):
     pass
 
@@ -27,6 +31,7 @@ class Player():
         self.step = self.size[0]
         self.colour = colour
         self.name = name
+        self.spells = []
 
         if len(position) > 0:
             self.initial_position = position
@@ -83,10 +88,15 @@ class Player():
         font.set_bold(True)
         box = font.render(self.name, False, (255, 255, 255))
 
+        for b in range(len(self.spells)): # Calculate position increments of projectile 
+            self.spells[b][0]+=10
 
         if(self.is_centre):
             self.screen.blit(box, (centre[0], centre[1] - 20)) # Draws name above centre player
             pygame.draw.rect(self.screen, self.colour, Rect(centre, self.size))
+
+            for spell in self.spells: # Draw projectiles
+                pygame.draw.rect(self.screen, (0,0,0), Rect((spell[0],spell[1]), (8,8)))
         else:
             offset_centre = (
                 self.x - self.map.centre_player.x + centre[0],
@@ -136,6 +146,13 @@ class Player():
             self.__raiseNoPosition()
 
         return Position(self.x, self.y)
+
+    def attack(self,action):
+        centre = self.map.get_centre()
+
+        if action == Action.SPELL:
+            self.spells.append([centre[0], centre[1]])
+
 
 class PlayerManager():
     def __init__(self, me):
