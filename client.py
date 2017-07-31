@@ -78,7 +78,6 @@ class GameClient():
         running = True
         clock = pygame.time.Clock()
         tickspeed = 60
-
         delay = 100
         joystick = pygame.joystick.Joystick(0)
         neutral = True
@@ -161,7 +160,8 @@ class GameClient():
                     y_axis = joystick.get_axis(1)
                     x_axis = joystick.get_axis(0)
                     move = False
-                    if joystick.get_axis(1) == 0:
+
+                    if joystick.get_axis(1) == 0: #Indicates no motion.
                         neutral = True
                         pressed = 0
                     else:
@@ -179,15 +179,13 @@ class GameClient():
                             me.move(Movement.DOWN)
                         if y_axis < -0.5:
                             me.move(Movement.UP)
+                        # left/right
                         if x_axis > 0.5:
                             me.move(Movement.RIGHT)
                         if x_axis < -0.5:
                             me.move(Movement.LEFT)
-
                     last_update = pygame.time.get_ticks()
-                    # print("Delay = " + str(delay))
-                    # print("Neutral = " + str(neutral))
-                    # print("Pressed = " + str(pressed))
+
                 pygame.display.update()
         finally:
             self.network.stop()
