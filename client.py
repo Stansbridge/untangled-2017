@@ -37,7 +37,7 @@ class GameClient():
         self.network = Network()
         self.setup_pygame()
         self.players = PlayerManager(Player(self.screen, self.map))
-        self.map.set_centre_player(self.players.me) 
+        self.map.set_centre_player(self.players.me)
         self.menu = MainMenu(self.screen, 'assets/fonts/alterebro-pixel-font.ttf', self.players)
 
     def setup_pygame(self, width=1024, height=1024):
@@ -79,6 +79,12 @@ class GameClient():
         clock = pygame.time.Clock()
         tickspeed = 60
 
+        delay = 100
+        joystick = pygame.joystick.Joystick(0)
+        neutral = True
+        pressed = 0
+        last_update = pygame.time.get_ticks()
+
         try:
             while running:
                 self.screen.fill((white))
@@ -106,22 +112,7 @@ class GameClient():
                             break
                         elif event.type == pygame.locals.KEYDOWN and event.key == pygame.locals.K_ESCAPE:
                             self.set_state(GameState.MENU)
-                        # JOYAXISMOTION triggers when the value changes
-                        # We need to retain the direction value each tick
-                        # To emulate 'keydown' functionality
-                        elif event.type == pygame.locals.JOYAXISMOTION:
-                            # up/down
-                            if event.axis == 1:
-                                if int(event.value) < 0:
-                                    me.move(Movement.UP)
-                                if int(event.value) > 0:
-                                    me.move(Movement.DOWN)
-                            # left/right
-                            elif event.axis == 0:
-                                if int(event.value) < 0:
-                                    me.move(Movement.LEFT)
-                                if int(event.value) > 0:
-                                    me.move(Movement.RIGHT)
+
                         elif event.type == pygame.locals.KEYDOWN:
                             if event.key == pygame.locals.K_UP:
                                 me.move(Movement.UP)
@@ -166,6 +157,37 @@ class GameClient():
                             print(e)
                             pass
 
+                    # Handle controller input.
+                    y_axis = joystick.get_axis(1)
+                    x_axis = joystick.get_axis(0)
+                    move = False
+                    if joystick.get_axis(1) == 0:
+                        neutral = True
+                        pressed = 0
+                    else:
+                        if neutral:
+                            move = True
+                            neutral = False
+                        else:
+                            pressed += pygame.time.get_ticks() - last_update
+                    if pressed > delay:
+                        move = True
+                        pressed -= delay
+                    if move:
+                        # up/down
+                        if y_axis > 0.5:
+                            me.move(Movement.DOWN)
+                        if y_axis < -0.5:
+                            me.move(Movement.UP)
+                        if x_axis > 0.5:
+                            me.move(Movement.RIGHT)
+                        if x_axis < -0.5:
+                            me.move(Movement.LEFT)
+
+                    last_update = pygame.time.get_ticks()
+                    # print("Delay = " + str(delay))
+                    # print("Neutral = " + str(neutral))
+                    # print("Pressed = " + str(pressed))
                 pygame.display.update()
         finally:
             self.network.stop()
