@@ -133,7 +133,7 @@ class GameClient():
                                 me.move(Movement.RIGHT)
                             elif event.key == pygame.locals.K_RETURN:
                                 me.attack(Action.SPELL)
-                                self.network.node.shout("world:combat", bson.dumps(me.cast_spell.get_position()._asdict()))
+                                # self.network.node.shout("world:combat", bson.dumps(me.cast_spell.get_position()._asdict()))
                             pygame.event.clear(pygame.locals.KEYDOWN)
 
                     self.map.render()
@@ -149,7 +149,7 @@ class GameClient():
 
                                 if event.group == "world:position":
                                     new_position = bson.loads(event.msg[0])
-                                    network_player = self.players.get(event.peer_uuid
+                                    network_player = self.players.get(event.peer_uuid)
                                 if event.group == "world:combat":
                                     new_spell_position = bson.loads(event.msg[0])
                                     # Load position of spell
