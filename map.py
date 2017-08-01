@@ -171,10 +171,10 @@ class Map():
         return tile.attributes
 
     def can_move_to(self, x, y):
-        if not x in range(self.level.width):
+        if x < 0 or x >= self.level.width:
             # are we horizontally too far left or right
             return False
-        elif not y in range(self.level.height):
+        elif y < 0 or y >= self.level.height:
             # are we vertically too far left or right
             return False
         elif self.get_tile_attributes(x, y) & TileTypes.COLLIDE.value:
