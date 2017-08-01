@@ -80,31 +80,23 @@ class Player():
     def render(self):
         centre = self.map.get_centre()
 
-        # get the font we want to use
         font = pygame.font.Font(None, 30)
         font.set_bold(True)
 
-        # combine the text and font into an image
         name_tag = font.render(self.name, False, (255, 255, 255))
 
-        # offset centre for the player's position on the screen if they are not
-        # the centre player
         if not self.is_centre:
             centre = (
                 self.x - self.map.centre_player.x + centre[0],
                 self.x - self.map.centre_player.x + centre[1]
             )
 
-        # position the name tag in a nice location, not directly over the player
         name_tag_pos = (
-                centre[0] + ((self.size[0] - name_tag.get_width()) // 2), # shift text pos to be centre-aligned
-                centre[1] - 20 # shift text pos to be above player
+                centre[0] + ((self.size[0] - name_tag.get_width()) // 2),
+                centre[1] - 20
         )
 
-        # put the text we've rendered onto the screen
         self.screen.blit(name_tag, name_tag_pos)
-
-        # draw the player
         pygame.draw.rect(self.screen, self.colour, Rect(centre, self.size))
 
 
