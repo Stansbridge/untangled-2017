@@ -61,12 +61,14 @@ class GameClient():
             pygame.locals.KEYDOWN])
 
         self.levels = {
-              "main": ProceduralLevel("main", Tileset(pygame.image.load('assets/tilesets/main.png').convert(), Music(pygame.mixer.music.load('assets/music/song.mp3')) (64, 64), {
+              "main": ProceduralLevel("main", Tileset(pygame.image.load('assets/tilesets/main.png').convert(), (64, 64), {
                 6: TileTypes.COLLIDE.value
-                }, (32, 32)), 4343438483844)
-            }
+                }, (32, 32)), TileMusic('assets/music/song.mp3'), 4343438483844)
+        }
 
         self.map = Map(self.screen, self.levels.get("main"), (32, 32))
+        self.map.level.music.load_music()
+        self.map.level.music.play_music_repeat()
 
     def set_state(self, new_state):
         if(new_state and new_state != self.game_state):
@@ -83,7 +85,6 @@ class GameClient():
         tickspeed = 60
 
         try:
-            pygame.mixer.music.play(-1)
 
             while running:
                 self.screen.fill((white))
