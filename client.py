@@ -78,11 +78,6 @@ class GameClient():
         running = True
         clock = pygame.time.Clock()
         tickspeed = 60
-        delay = 100
-        joystick = pygame.joystick.Joystick(0)
-        neutral = True
-        pressed = 0
-        last_update = pygame.time.get_ticks()
 
         try:
             while running:
@@ -156,11 +151,19 @@ class GameClient():
                             print(e)
                             pass
 
-                    # Handle controller input.
+                    # https://stackoverflow.com/a/15596758/3954432
+                    # Handle controller input by setting flags (move, neutral)
+                    # and using timers (delay, pressed).
+                    # Move if pressed timer is greater than delay.
                     y_axis = joystick.get_axis(1)
                     x_axis = joystick.get_axis(0)
                     move = False
-
+                    delay = 100
+                    joystick = pygame.joystick.Joystick(0)
+                    neutral = True
+                    pressed = 0
+                    last_update = pygame.time.get_ticks()
+                    
                     if joystick.get_axis(1) == 0: #Indicates no motion.
                         neutral = True
                         pressed = 0
