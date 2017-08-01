@@ -6,6 +6,7 @@ import pygame
 import configparser
 from pygame.rect import Rect
 
+import client
 
 class Movement(Enum):
     UP = 1
@@ -80,8 +81,7 @@ class Player():
     def render(self):
         centre = self.map.get_centre()
 
-        font = pygame.font.Font(None, 30)
-        font.set_bold(True)
+        font = pygame.font.Font(client.font, 30)
 
         name_tag = font.render(self.name, False, (255, 255, 255))
 
@@ -93,7 +93,7 @@ class Player():
 
         name_tag_pos = (
                 centre[0] + ((self.size[0] - name_tag.get_width()) // 2),
-                centre[1] - 20
+                centre[1] - ((self.size[1] + name_tag.get_height()) // 2)
         )
 
         self.screen.blit(name_tag, name_tag_pos)

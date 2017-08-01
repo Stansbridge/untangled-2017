@@ -23,6 +23,8 @@ white = (255,255,255)
 black = (0,0,0)
 red = (255, 0, 0)
 
+font = 'assets/fonts/alterebro-pixel-font.ttf'
+
 class GameState(Enum):
     MENU = 0
     PLAY = 1
@@ -38,7 +40,7 @@ class GameClient():
         self.setup_pygame()
         self.players = PlayerManager(Player(self.screen, self.map))
         self.map.set_centre_player(self.players.me)
-        self.menu = MainMenu(self.screen, 'assets/fonts/alterebro-pixel-font.ttf', self.players)
+        self.menu = MainMenu(self.screen, self.players)
 
     def setup_pygame(self, width=1024, height=1024):
         self.screen = pygame.display.set_mode((width, height), pygame.HWSURFACE)
