@@ -68,7 +68,7 @@ class GameClient():
 
         self.map = Map(self.screen, self.levels.get("main"), (32, 32))
         self.map.level.music.load_music()
-        self.map.level.music.play_music_repeat()
+        TileMusic.play_music_repeat()
 
     def set_state(self, new_state):
         if(new_state and new_state != self.game_state):
