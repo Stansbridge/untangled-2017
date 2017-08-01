@@ -171,7 +171,7 @@ class GameClient():
                         y_axis = joystick.get_axis(1)
                         x_axis = joystick.get_axis(0)
 
-                        if joystick.get_axis(1) == 0: #Indicates no motion.
+                        if y_axis == 0 and x_axis == 0: #Indicates no motion.
                             neutral = True
                             pressed = 0
                         else:
