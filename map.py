@@ -139,7 +139,7 @@ class ProceduralLevel(Level):
         else:
             id = 2
 
-        return self.tileset.get_tile_by_id(id
+        return self.tileset.get_tile_by_id(id)
 
 class Map():
     def __init__(self, screen, level, world_dimension = (32, 32)):
