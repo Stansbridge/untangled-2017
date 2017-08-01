@@ -1,9 +1,12 @@
 import pygame
 import pygame.locals
+import os.path
 
 from functools import reduce
 from opensimplex import OpenSimplex
 from enum import Enum
+from pyknon.genmidi import Midi
+from pyknon.music import NoteSeq
 
 from player import *
 
@@ -104,6 +107,24 @@ class TileMusic():
 
     def stop_music(self):
         pygame.mixer.music.stop()
+
+    # https://github.com/kroger/pyknon
+    # e.g. create_music("D4 F#8 A Bb4", 90, 0, "Test")
+    # Append given notes to music file.
+    def create_music(self, note_seq, given_tempo, given_track, song_name):
+        notes = NoteSeq(note_seq)
+        midi = Midi(1, tempo=given_tempo)
+        midi.seq_notes(notes, track=given_track)
+        file = ("assets\music\/" + song_name + ".mid")
+
+        # Check if file exists, if not create a new one.
+        if os.path.isfile(file):
+            midi.write(file)
+        else:
+            f = (open("assets/music/" + song_name + ".mid"),"w+")
+            f.close()
+            midi.write(file)
+
 
 class Level():
     def __init__(self, id, tileset, music):
