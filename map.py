@@ -170,6 +170,19 @@ class Map():
         tile = self.level.get_grid_tile(adjusted_x, adjusted_y)
         return tile.attributes
 
+    def can_move_to(self, x, y):
+        if not x in range(self.level.width):
+            # are we horizontally too far left or right
+            return False
+        elif not y in range(self.level.height):
+            # are we vertically too far left or right
+            return False
+        elif self.get_tile_attributes(x, y) & TileTypes.COLLIDE.value:
+            # are we trying to move into a solid block
+            return False
+        # we were none of those things, we can move
+        return True
+
     def render(self):
 
         screen_tile_width = self.screen_size[0] // self.dimension[0]

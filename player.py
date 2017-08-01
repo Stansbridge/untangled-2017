@@ -114,19 +114,7 @@ class Player():
         elif direction == Movement.LEFT:
             tmp_x -= self.step
 
-        tile_attribs = self.map.get_tile_attributes(tmp_x, tmp_y)
-
-        # Import TileTypes information Enum.
-        from map import TileTypes
-
-        # TODO: Prevent the player from moving beyond the bounds of the map.
-
-        # If the tile_attribs includes "TileTypes.COLLIDE" record this as a collision.
-        if(tile_attribs & TileTypes.COLLIDE.value):
-            collision = True
-
-        # If a collision has occurred return before the player has moved.
-        if(collision):
+        if not self.map.can_move_to(tmp_x, tmp_y):
             return
 
         self.set_position(Position(tmp_x, tmp_y))
