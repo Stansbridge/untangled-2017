@@ -87,10 +87,29 @@ class Tileset():
                 else:
                     self.tiles[id] = Tile(self.get_attributes(id), self.find_subsurface(id))
 
+class TileMusic():
+    def __init__(self, location):
+        self.location = location
+
+    def load_music(self):
+        return pygame.mixer.music.load(self.location)
+
+    # Play the music a given number of times.
+    # -1 will play on repeat, 0 will play once and so on...
+    def play_music(self, count):
+        pygame.mixer.music.play(count)
+
+    def play_music_repeat(self):
+        pygame.mixer.music.play(-1)
+
+    def stop_music(self):
+        pygame.mixer.music.stop()
+
 class Level():
-    def __init__(self, id, tileset):
+    def __init__(self, id, tileset, music):
         self.id = id
         self.tileset = tileset
+        self.music = music
         self.load_grid()
 
     def load_grid(self):
@@ -100,10 +119,10 @@ class Level():
         return self.grid[y][x]
 
 class ProceduralLevel(Level):
-    def __init__(self, id, tileset, seed):
+    def __init__(self, id, tileset, music, seed):
         self.openSimplex = OpenSimplex(seed)
-        Level.__init__(self, id, tileset)
-    
+        Level.__init__(self, id, tileset, music)
+
     def load_grid(self, width = 500, height = 500):
         self.width = width
         self.height = height

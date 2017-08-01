@@ -46,6 +46,9 @@ class GameClient():
         # Initialise fonts.
         pygame.font.init()
 
+        # Initialise music
+        pygame.mixer.init()
+
         # Initialise the joystick.
         pygame.joystick.init()
         joysticks = [pygame.joystick.Joystick(x) for x in range(pygame.joystick.get_count())]
@@ -60,10 +63,12 @@ class GameClient():
         self.levels = {
               "main": ProceduralLevel("main", Tileset(pygame.image.load('assets/tilesets/main.png').convert(), (64, 64), {
                 6: TileTypes.COLLIDE.value
-                }, (32, 32)), 4343438483844)
-            }
+                }, (32, 32)), TileMusic('assets/music/song.mp3'), 4343438483844)
+        }
 
         self.map = Map(self.screen, self.levels.get("main"), (32, 32))
+        self.map.level.music.load_music()
+        self.map.level.music.play_music_repeat()
 
     def set_state(self, new_state):
         if(new_state and new_state != self.game_state):
@@ -80,6 +85,7 @@ class GameClient():
         tickspeed = 60
 
         try:
+
             while running:
                 self.screen.fill((white))
                 clock.tick(tickspeed)
@@ -155,39 +161,40 @@ class GameClient():
                     # Handle controller input by setting flags (move, neutral)
                     # and using timers (delay, pressed).
                     # Move if pressed timer is greater than delay.
-                    y_axis = joystick.get_axis(1)
-                    x_axis = joystick.get_axis(0)
-                    move = False
-                    delay = 100
-                    joystick = pygame.joystick.Joystick(0)
-                    neutral = True
-                    pressed = 0
-                    last_update = pygame.time.get_ticks()
-                    
-                    if joystick.get_axis(1) == 0: #Indicates no motion.
+                    if(pygame.joystick.get_count() > 0):
+                        joystick = pygame.joystick.Joystick(0)
+                        move = False
+                        delay = 100
                         neutral = True
                         pressed = 0
-                    else:
-                        if neutral:
-                            move = True
-                            neutral = False
+                        last_update = pygame.time.get_ticks()
+                        y_axis = joystick.get_axis(1)
+                        x_axis = joystick.get_axis(0)
+
+                        if joystick.get_axis(1) == 0: #Indicates no motion.
+                            neutral = True
+                            pressed = 0
                         else:
-                            pressed += pygame.time.get_ticks() - last_update
-                    if pressed > delay:
-                        move = True
-                        pressed -= delay
-                    if move:
-                        # up/down
-                        if y_axis > 0.5:
-                            me.move(Movement.DOWN)
-                        if y_axis < -0.5:
-                            me.move(Movement.UP)
-                        # left/right
-                        if x_axis > 0.5:
-                            me.move(Movement.RIGHT)
-                        if x_axis < -0.5:
-                            me.move(Movement.LEFT)
-                    last_update = pygame.time.get_ticks()
+                            if neutral:
+                                move = True
+                                neutral = False
+                            else:
+                                pressed += pygame.time.get_ticks() - last_update
+                        if pressed > delay:
+                            move = True
+                            pressed -= delay
+                        if move:
+                            # up/down
+                            if y_axis > 0.5:
+                                me.move(Movement.DOWN)
+                            if y_axis < -0.5:
+                                me.move(Movement.UP)
+                            # left/right
+                            if x_axis > 0.5:
+                                me.move(Movement.RIGHT)
+                            if x_axis < -0.5:
+                                me.move(Movement.LEFT)
+                        last_update = pygame.time.get_ticks()
 
                 pygame.display.update()
         finally:
