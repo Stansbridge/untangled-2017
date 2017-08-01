@@ -37,7 +37,7 @@ class GameClient():
         self.network = Network()
         self.setup_pygame()
         self.players = PlayerManager(Player(self.screen, self.map))
-        self.map.set_centre_player(self.players.me) 
+        self.map.set_centre_player(self.players.me)
         self.menu = MainMenu(self.screen, 'assets/fonts/alterebro-pixel-font.ttf', self.players)
 
     def setup_pygame(self, width=1024, height=1024):
@@ -45,6 +45,9 @@ class GameClient():
 
         # Initialise fonts.
         pygame.font.init()
+
+        # Initialise music
+        pygame.mixer.init()
 
         # Initialise the joystick.
         pygame.joystick.init()
@@ -58,7 +61,7 @@ class GameClient():
             pygame.locals.KEYDOWN])
 
         self.levels = {
-              "main": ProceduralLevel("main", Tileset(pygame.image.load('assets/tilesets/main.png').convert(), (64, 64), {
+              "main": ProceduralLevel("main", Tileset(pygame.image.load('assets/tilesets/main.png').convert(), Music(pygame.mixer.music.load('assets/music/song.mp3')) (64, 64), {
                 6: TileTypes.COLLIDE.value
                 }, (32, 32)), 4343438483844)
             }
@@ -80,6 +83,8 @@ class GameClient():
         tickspeed = 60
 
         try:
+            pygame.mixer.music.play(-1)
+
             while running:
                 self.screen.fill((white))
                 clock.tick(tickspeed)

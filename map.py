@@ -86,11 +86,15 @@ class Tileset():
                             Tile(self.get_attributes(10), self.find_subsurface(10)))
                 else:
                     self.tiles[id] = Tile(self.get_attributes(id), self.find_subsurface(id))
+class TileMusic():
+    def __init__(self, location):
+        self.location = location
 
 class Level():
-    def __init__(self, id, tileset):
+    def __init__(self, id, tileset, music):
         self.id = id
         self.tileset = tileset
+        self.music = music
         self.load_grid()
 
     def load_grid(self):
@@ -99,11 +103,14 @@ class Level():
     def get_grid_tile(self, x, y):
         return self.grid[y][x]
 
+    def get_level_music(self):
+        return self.music.location
+
 class ProceduralLevel(Level):
-    def __init__(self, id, tileset, seed):
+    def __init__(self, id, tileset, music, seed):
         self.openSimplex = OpenSimplex(seed)
-        Level.__init__(self, id, tileset)
-    
+        Level.__init__(self, id, tileset, music)
+
     def load_grid(self, width = 500, height = 500):
         self.width = width
         self.height = height
