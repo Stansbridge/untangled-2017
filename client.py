@@ -23,6 +23,8 @@ white = (255,255,255)
 black = (0,0,0)
 red = (255, 0, 0)
 
+font = 'assets/fonts/alterebro-pixel-font.ttf'
+
 class GameState(Enum):
     MENU = 0
     PLAY = 1
@@ -38,13 +40,20 @@ class GameClient():
         self.setup_pygame()
         self.players = PlayerManager(Player(self.screen, self.map))
         self.map.set_centre_player(self.players.me)
+<<<<<<< HEAD
         self.menu = MainMenu(self.screen, 'assets/fonts/alterebro-pixel-font.ttf', self.players)
+=======
+        self.menu = MainMenu(self.screen, self.players)
+>>>>>>> 3ac8409fbf50414911be6e4e413bd9c55f02f309
 
     def setup_pygame(self, width=1024, height=1024):
         self.screen = pygame.display.set_mode((width, height), pygame.HWSURFACE)
 
         # Initialise fonts.
         pygame.font.init()
+
+        # Initialise music
+        pygame.mixer.init()
 
         # Initialise the joystick.
         pygame.joystick.init()
@@ -60,10 +69,12 @@ class GameClient():
         self.levels = {
               "main": ProceduralLevel("main", Tileset(pygame.image.load('assets/tilesets/main.png').convert(), (64, 64), {
                 6: TileTypes.COLLIDE.value
-                }, (32, 32)), 4343438483844)
-            }
+                }, (32, 32)), TileMusic('assets/music/song.mp3'), 4343438483844)
+        }
 
         self.map = Map(self.screen, self.levels.get("main"), (32, 32))
+        self.map.level.music.load_music()
+        self.map.level.music.play_music_repeat()
 
     def set_state(self, new_state):
         if(new_state and new_state != self.game_state):
@@ -80,6 +91,7 @@ class GameClient():
         tickspeed = 60
 
         try:
+
             while running:
                 self.screen.fill((white))
                 clock.tick(tickspeed)
@@ -106,22 +118,7 @@ class GameClient():
                             break
                         elif event.type == pygame.locals.KEYDOWN and event.key == pygame.locals.K_ESCAPE:
                             self.set_state(GameState.MENU)
-                        # JOYAXISMOTION triggers when the value changes
-                        # We need to retain the direction value each tick
-                        # To emulate 'keydown' functionality
-                        elif event.type == pygame.locals.JOYAXISMOTION:
-                            # up/down
-                            if event.axis == 1:
-                                if int(event.value) < 0:
-                                    me.move(Movement.UP)
-                                if int(event.value) > 0:
-                                    me.move(Movement.DOWN)
-                            # left/right
-                            elif event.axis == 0:
-                                if int(event.value) < 0:
-                                    me.move(Movement.LEFT)
-                                if int(event.value) > 0:
-                                    me.move(Movement.RIGHT)
+
                         elif event.type == pygame.locals.KEYDOWN:
                             if event.key == pygame.locals.K_UP:
                                 me.move(Movement.UP)
@@ -171,6 +168,45 @@ class GameClient():
                             # PlayerException due to no initial position being set for that player
                             print(e)
                             pass
+
+                    # https://stackoverflow.com/a/15596758/3954432
+                    # Handle controller input by setting flags (move, neutral)
+                    # and using timers (delay, pressed).
+                    # Move if pressed timer is greater than delay.
+                    if(pygame.joystick.get_count() > 0):
+                        joystick = pygame.joystick.Joystick(0)
+                        move = False
+                        delay = 100
+                        neutral = True
+                        pressed = 0
+                        last_update = pygame.time.get_ticks()
+                        y_axis = joystick.get_axis(1)
+                        x_axis = joystick.get_axis(0)
+
+                        if y_axis == 0 and x_axis == 0: #Indicates no motion.
+                            neutral = True
+                            pressed = 0
+                        else:
+                            if neutral:
+                                move = True
+                                neutral = False
+                            else:
+                                pressed += pygame.time.get_ticks() - last_update
+                        if pressed > delay:
+                            move = True
+                            pressed -= delay
+                        if move:
+                            # up/down
+                            if y_axis > 0.5:
+                                me.move(Movement.DOWN)
+                            if y_axis < -0.5:
+                                me.move(Movement.UP)
+                            # left/right
+                            if x_axis > 0.5:
+                                me.move(Movement.RIGHT)
+                            if x_axis < -0.5:
+                                me.move(Movement.LEFT)
+                        last_update = pygame.time.get_ticks()
 
                 pygame.display.update()
         finally:

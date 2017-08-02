@@ -3,15 +3,17 @@ import time
 
 from enum import Enum
 
+import client
+
 class Screen():
-    def __init__(self, pygame_screen, font_path):
+    def __init__(self, pygame_screen):
         self.pygame_screen = pygame_screen
-        self.font_path = font_path
+        self.font_path = client.font
         self.fonts = {
-            'small': pygame.font.Font(font_path, 45),
-            'normal': pygame.font.Font(font_path, 55),
-            'large': pygame.font.Font(font_path, 75),
-            'heading': pygame.font.Font(font_path, 95),
+            'small': pygame.font.Font(client.font, 45),
+            'normal': pygame.font.Font(client.font, 55),
+            'large': pygame.font.Font(client.font, 75),
+            'heading': pygame.font.Font(client.font, 95),
         }
 
 
@@ -27,8 +29,8 @@ class MenuState(Enum):
     RESUME = 2
 
 class MainMenu(Screen):
-    def __init__(self, pygame_screen, font_path, player_manager):
-        super().__init__(pygame_screen, font_path)
+    def __init__(self, pygame_screen, player_manager):
+        super().__init__(pygame_screen)
 
         self.selected = 0
         self.state = MenuState.CHOICE

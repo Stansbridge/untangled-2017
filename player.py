@@ -6,6 +6,7 @@ import pygame
 import configparser
 from pygame.rect import Rect
 
+import client
 
 class Movement(Enum):
     UP = 1
@@ -84,24 +85,30 @@ class Player():
 
     def render(self):
         centre = self.map.get_centre()
-        font = pygame.font.Font(None, 30)
-        font.set_bold(True)
-        box = font.render(self.name, False, (255, 255, 255))
 
+<<<<<<< HEAD
         # Check if the user has cast a spell.
         if self.cast_spell is not None:
             self.cast_spell.render()
+=======
+        font = pygame.font.Font(client.font, 30)
+>>>>>>> 3ac8409fbf50414911be6e4e413bd9c55f02f309
 
-        if(self.is_centre):
-            self.screen.blit(box, (centre[0], centre[1] - 20)) # Draws name above centre player
-            pygame.draw.rect(self.screen, self.colour, Rect(centre, self.size))
-        else:
-            offset_centre = (
+        name_tag = font.render(self.name, False, (255, 255, 255))
+
+        if not self.is_centre:
+            centre = (
                 self.x - self.map.centre_player.x + centre[0],
                 self.y - self.map.centre_player.y + centre[1]
             )
-            self.screen.blit(box, (offset_centre[0], offset_centre[1] - 20)) # Draws name above another player
-            pygame.draw.rect(self.screen, self.colour, Rect(offset_centre, self.size))
+
+        name_tag_pos = (
+                centre[0] + ((self.size[0] - name_tag.get_width()) // 2),
+                centre[1] - ((self.size[1] + name_tag.get_height()) // 2)
+        )
+
+        self.screen.blit(name_tag, name_tag_pos)
+        pygame.draw.rect(self.screen, self.colour, Rect(centre, self.size))
 
 
     def move(self, direction):
@@ -122,19 +129,7 @@ class Player():
         elif direction == Movement.LEFT:
             tmp_x -= self.step
 
-        tile_attribs = self.map.get_tile_attributes(tmp_x, tmp_y)
-
-        # Import TileTypes information Enum.
-        from map import TileTypes
-
-        # TODO: Prevent the player from moving beyond the bounds of the map.
-
-        # If the tile_attribs includes "TileTypes.COLLIDE" record this as a collision.
-        if(tile_attribs & TileTypes.COLLIDE.value):
-            collision = True
-
-        # If a collision has occurred return before the player has moved.
-        if(collision):
+        if not self.map.can_move_to(tmp_x, tmp_y):
             return
 
         self.set_position(Position(tmp_x, tmp_y))
