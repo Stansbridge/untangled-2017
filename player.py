@@ -86,13 +86,7 @@ class Player():
     def render(self):
         centre = self.map.get_centre()
 
-<<<<<<< HEAD
-        # Check if the user has cast a spell.
-        if self.cast_spell is not None:
-            self.cast_spell.render()
-=======
         font = pygame.font.Font(client.font, 30)
->>>>>>> 3ac8409fbf50414911be6e4e413bd9c55f02f309
 
         name_tag = font.render(self.name, False, (255, 255, 255))
 
@@ -106,6 +100,10 @@ class Player():
                 centre[0] + ((self.size[0] - name_tag.get_width()) // 2),
                 centre[1] - ((self.size[1] + name_tag.get_height()) // 2)
         )
+
+        # Check if the user has cast a spell.
+        if self.cast_spell is not None:
+            self.cast_spell.render()
 
         self.screen.blit(name_tag, name_tag_pos)
         pygame.draw.rect(self.screen, self.colour, Rect(centre, self.size))

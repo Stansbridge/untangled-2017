@@ -40,11 +40,7 @@ class GameClient():
         self.setup_pygame()
         self.players = PlayerManager(Player(self.screen, self.map))
         self.map.set_centre_player(self.players.me)
-<<<<<<< HEAD
-        self.menu = MainMenu(self.screen, 'assets/fonts/alterebro-pixel-font.ttf', self.players)
-=======
         self.menu = MainMenu(self.screen, self.players)
->>>>>>> 3ac8409fbf50414911be6e4e413bd9c55f02f309
 
     def setup_pygame(self, width=1024, height=1024):
         self.screen = pygame.display.set_mode((width, height), pygame.HWSURFACE)
