@@ -88,7 +88,7 @@ class Player():
         if not self.is_centre:
             centre = (
                 self.x - self.map.centre_player.x + centre[0],
-                self.x - self.map.centre_player.x + centre[1]
+                self.y - self.map.centre_player.y + centre[1]
             )
 
         name_tag_pos = (
