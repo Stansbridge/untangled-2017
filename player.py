@@ -19,6 +19,12 @@ class Action(Enum):
     SPELL = 1
     SWIPE = 2
 
+class Action_Direction(Enum):
+    UP = 1
+    RIGHT = 2
+    DOWN = 3
+    LEFT = 4
+
 class PlayerException(Exception):
     pass
 
@@ -108,7 +114,6 @@ class Player():
         self.screen.blit(name_tag, name_tag_pos)
         pygame.draw.rect(self.screen, self.colour, Rect(centre, self.size))
 
-
     def move(self, direction):
         if not self.ready:
             self.__raiseNoPosition()
@@ -138,34 +143,52 @@ class Player():
 
         return Position(self.x, self.y)
 
-    def attack(self,action):
+    def attack(self, action, direction):
         centre = self.map.get_centre()
 
         if action == Action.SPELL:
-            self.cast_spell = Spell(self)
+            if direction == Action_Direction.UP:
+                self.cast_spell = Spell(self, 0, -10)
+            elif direction == Action_Direction.RIGHT:
+                self.cast_spell = Spell(self, 10, 0)
+            elif direction == Action_Direction.DOWN:
+                self.cast_spell = Spell(self, 0, 10)
+            elif direction == Action_Direction.LEFT:
+                self.cast_spell = Spell(self, -10, 0)
         elif action == Action.SWIPE:
             #TODO
             return
 
 class Spell():
-    def __init__(self, player, size=(8,8), colour=(0,0,0)):
+    def __init__(self, player, x_velocity, y_velocity, position=(0,0), size=(8,8), colour=(0,0,0)):
         self.player = player
+        self.x_velocity = x_velocity
+        self.y_velocity = y_velocity
         self.size = size
         self.colour = colour
-        self.position = []
+        self.x_distance = 0
+        self.y_distance = 0
 
-        centre = player.map.get_centre()
-        self.position.append([centre[0], centre[1]])
+        self.set_position(position)
 
     def render(self):
-        for b in range(len(self.position)): # Calculate position increments of projectile
-            self.position[b][0]+=10
-        for p in self.position:
-            pygame.draw.rect(self.player.screen, self.colour, Rect((p[0],p[1]), self.size))
+        position = (
+            self.player.map.get_centre()[0] + self.x_distance,
+            self.player.map.get_centre()[1] + self.y_distance
+        )
+
+        if not self.player.is_centre:
+            position = (
+                self.x - self.player.map.centre_player.x + position[0] + self.x_distance,
+                self.y - self.player.map.centre_player.y + position[1] + self.y_distance
+            )
+
+        pygame.draw.rect(self.player.screen, self.colour, Rect(position, self.size))
+        self.x_distance += self.x_velocity
+        self.y_distance += self.y_velocity
 
     def get_position(self):
-        for p in self.position:
-            return Position(p[0],p[1])
+        return Position(self.x, self.y)
 
     def set_position(self, position):
         self.x, self.y = position
