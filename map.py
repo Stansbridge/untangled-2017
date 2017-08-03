@@ -17,76 +17,6 @@ class TileTypes(Enum):
     LAVA = 4
     WATER = 8
 
-class Tile():
-    def __init__(self, attributes, subsurface):
-        self.attributes = attributes
-        self.subsurface = subsurface
-
-def gridTileFactory (*tiles):
-    def processSurfaces(x, y):
-        x = x.copy()
-        y = y.copy()
-        x.blit(y, (0, 0))
-        return x
-
-    tiles = list(tiles)
-    subsurface = reduce(processSurfaces, [t.subsurface for t in tiles])
-    attributes = reduce(lambda x, y: x | y, [t.attributes for t in tiles])
-    return Tile(attributes, subsurface)
-
-class Tileset():
-    def __init__(self, tileset, dimension, attributes, world_dimension):
-        self.tileset = tileset
-        self.width, self.height = tileset.get_size()
-        self.dimension = dimension
-        self.attributes = attributes
-        self.world_dimension = world_dimension
-        self.tiles = {}
-        self.load_tiles()
-
-    def get_tile_by_id(self, id):
-        return self.tiles[id]
-
-    def get_attributes(self, id):
-        return self.attributes.get(id, 0)
-
-    def find_position(self, id):
-        x = id % (self.width // self.dimension[0])
-        y = id // (self.height // self.dimension[1])
-        return (x, y)
-
-    def find_id(self, x, y):
-        return y * (self.width // self.dimension[0]) + x
-
-    def find_subsurface(self, id):
-        clip_x, clip_y = self.find_position(id)
-        tw, th = self.dimension
-
-        clip_rect = (
-            tw * clip_x,
-            th * clip_y,
-            tw,
-            th
-        )
-
-        subsurface = self.tileset.subsurface(clip_rect).convert_alpha()
-        subsurface = pygame.transform.scale(subsurface, self.world_dimension)
-        return subsurface
-
-    def load_tiles(self):
-        w = self.width // self.dimension[0]
-        h = self.height // self.dimension[1]
-
-        for i in range(w):
-            for j in range(h):
-                id = self.find_id(i, j)
-                if id == 6:
-                    self.tiles[id] = gridTileFactory(
-                            Tile(self.get_attributes(id), self.find_subsurface(id)),
-                            Tile(self.get_attributes(10), self.find_subsurface(10)))
-                else:
-                    self.tiles[id] = Tile(self.get_attributes(id), self.find_subsurface(id))
-
 class TileMusic():
     def __init__(self, location):
         self.location = location
@@ -123,7 +53,7 @@ class ProceduralLevel(Level):
         self.openSimplex = OpenSimplex(seed)
         Level.__init__(self, id, tileset, music)
 
-    def load_grid(self, width = 500, height = 500):
+    def load_grid(self, width = 25, height = 25):
         self.width = width
         self.height = height
         self.grid = [
@@ -171,10 +101,10 @@ class Map():
         return tile.attributes
 
     def can_move_to(self, x, y):
-        if x < 0 or x >= self.level.width:
+        if x < 0 or x >= self.level.width * self.dimension[0]:
             # are we horizontally too far left or right
             return False
-        elif y < 0 or y >= self.level.height:
+        elif y < 0 or y >= self.level.height * self.dimension[1]:
             # are we vertically too far left or right
             return False
         elif self.get_tile_attributes(x, y) & TileTypes.COLLIDE.value:

@@ -7,6 +7,7 @@ import configparser
 from pygame.rect import Rect
 
 import client
+from tileset import Tileset
 
 class Movement(Enum):
     UP = 1
@@ -28,6 +29,7 @@ class Player():
         self.step = self.size[0]
         self.colour = colour
         self.name = name
+        self.tileset = Tileset(client.player_animation_tileset_path, (32, 32), {}, (32, 32))
 
         if len(position) > 0:
             self.initial_position = position
@@ -97,14 +99,13 @@ class Player():
         )
 
         self.screen.blit(name_tag, name_tag_pos)
-        pygame.draw.rect(self.screen, self.colour, Rect(centre, self.size))
+        self.screen.blit(self.tileset.get_tile_by_id(1).subsurface, centre)
+        # pygame.draw.rect(self.screen, self.colour, Rect(centre, self.size))
 
 
     def move(self, direction):
         if not self.ready:
             self.__raiseNoPosition()
-
-        collision = False
 
         tmp_x = self.x
         tmp_y = self.y
