@@ -19,19 +19,18 @@ class PlayerException(Exception):
     pass
 
 class Player():
-    def __init__(self, screen, map, position=(0, 0), size=(32, 32), colour=(255, 255, 255), name = "Name"):
+    def __init__(self, screen, map, colour=(255, 255, 255)):
         self.screen = screen
         self.map = map
         self.ready = False
         self.is_centre = False
-        self.size = size
+        self.size = (32, 32)
         self.step = self.size[0]
         self.colour = colour
-        self.name = name
+        self.name = 'Name'
 
-        if len(position) > 0:
-            self.initial_position = position
-            self.set_position(position)
+        self.initial_position = (0, 0)
+        self.set_position(self.initial_position)
 
     def __raiseNoPosition(self):
         raise PlayerException({"message": "Player does not have a position set", "player": self})

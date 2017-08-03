@@ -23,6 +23,9 @@ white = (255,255,255)
 black = (0,0,0)
 red = (255, 0, 0)
 
+width = 1024
+height = 1024
+
 font = 'assets/fonts/alterebro-pixel-font.ttf'
 
 class GameState(Enum):
@@ -42,7 +45,8 @@ class GameClient():
         self.map.set_centre_player(self.players.me)
         self.menu = MainMenu(self.screen, self.players)
 
-    def setup_pygame(self, width=1024, height=1024):
+    def setup_pygame(self):
+        # Initialise screen/display
         self.screen = pygame.display.set_mode((width, height), pygame.HWSURFACE)
 
         # Initialise fonts.
@@ -65,10 +69,10 @@ class GameClient():
         self.levels = {
               "main": ProceduralLevel("main", Tileset(pygame.image.load('assets/tilesets/main.png').convert(), (64, 64), {
                 6: TileTypes.COLLIDE.value
-                }, (32, 32)), TileMusic('assets/music/song.mp3'), 4343438483844)
+                }, (64, 64)), TileMusic('assets/music/song.mp3'), 4343438483844)
         }
 
-        self.map = Map(self.screen, self.levels.get("main"), (32, 32))
+        self.map = Map(self.screen, self.levels.get("main"), (64, 64))
         self.map.level.music.load_music()
         self.map.level.music.play_music_repeat()
 
