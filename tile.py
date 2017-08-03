@@ -46,7 +46,7 @@ class Tileset():
         clip_x, clip_y = self.find_position(id)
 
         cur_tile_width = (self.image.get_width() / self.grid_dimensions[0])
-        cur_tile_height = (self.image.get_height() / self.grid_dimensions[0])
+        cur_tile_height = (self.image.get_height() / self.grid_dimensions[1])
 
         clip_rect = (
             cur_tile_width * clip_x,
