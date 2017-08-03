@@ -24,11 +24,11 @@ class Level():
 
 
 class ProceduralLevel(Level):
-    def __init__(self, seed):
+    def __init__(self, seed, width = 250, height = 250):
         self.openSimplex = OpenSimplex(seed)
-        self.load_tiles()
+        self.load_tiles(width, height)
 
-    def load_tiles(self, width = 1000, height = 1000):
+    def load_tiles(self, width, height):
         self.width = width
         self.height = height
         self.grid = [

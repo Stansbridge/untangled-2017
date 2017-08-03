@@ -25,8 +25,8 @@ white = (255,255,255)
 black = (0,0,0)
 red = (255, 0, 0)
 
-width = 3840
-height = 2160
+width = 1024
+height = 1024
 
 font = 'assets/fonts/alterebro-pixel-font.ttf'
 level_tileset_path = 'assets/tilesets/main.png'
@@ -51,7 +51,7 @@ class GameClient():
 
     def setup_pygame(self):
         # Initialise screen/display
-        self.screen = pygame.display.set_mode((width, height), pygame.HWSURFACE | pygame.FULLSCREEN)
+        self.screen = pygame.display.set_mode((width, height), pygame.HWSURFACE)
 
         # Initialise fonts.
         pygame.font.init()

@@ -28,7 +28,7 @@ class Player():
         self.ready = False
         self.is_centre = False
         self.size = (map_module.TILE_PIX_WIDTH, map_module.TILE_PIX_HEIGHT)
-        self.step = 16
+        self.step = 1
         self.colour = colour
         self.tileset = Tileset(client.player_animation_tileset_path, (3, 4), (32, 32))
         self.name = 'Name'
