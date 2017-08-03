@@ -7,7 +7,7 @@ import configparser
 from pygame.rect import Rect
 
 import client
-from map import TILE_PIX_WIDTH, TILE_PIX_HEIGHT
+import map as map_module
 
 class Movement(Enum):
     UP = 1
@@ -25,7 +25,7 @@ class Player():
         self.map = map
         self.ready = False
         self.is_centre = False
-        self.size = (TILE_PIX_WIDTH, TILE_PIX_HEIGHT)
+        self.size = (map_module.TILE_PIX_WIDTH, map_module.TILE_PIX_HEIGHT)
         self.step = 1
         self.colour = colour
         self.name = 'Name'
