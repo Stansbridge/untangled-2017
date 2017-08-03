@@ -17,7 +17,7 @@ class TileAttribute(Enum):
 
 class TileType(Enum):
     DIRT = (2, [])
-    BRICK = (63, [ TileAttribute.COLLIDE ])
+    BRICK = (1, [ TileAttribute.COLLIDE ])
 
     def __init__(self, tileset_id, attributes):
         self.tileset_id = tileset_id
@@ -68,4 +68,4 @@ class Tileset():
         return (x, y)
 
     def find_id(self, x, y):
-        return y * (self.image.get_width() // self.grid_dimensions[0]) + x
+        return y * self.grid_dimensions[1] + x

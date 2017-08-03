@@ -18,8 +18,7 @@ class Level():
         elif y < 0 or y >= self.height:
             return False
         elif self.get_tile(x, y).has_attribute(TileAttribute.COLLIDE):
-            # return False
-            return True
+            return False
         return True
 
 
