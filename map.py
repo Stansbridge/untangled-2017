@@ -45,7 +45,6 @@ class Map():
         centred_x = pixel_x + (self.screen.get_width() // 2)
         centred_y = pixel_y + (self.screen.get_height() // 2)
 
-        # round down
         return [centred_x, centred_y]
 
     def get_map_pos(self, pixel_x, pixel_y):
@@ -62,7 +61,6 @@ class Map():
         map_x = relative_x + self.centre_player.x
         map_y = relative_y + self.centre_player.y
 
-        # round down
         return [map_x, map_y]
 
 

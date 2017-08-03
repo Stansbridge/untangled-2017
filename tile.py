@@ -23,9 +23,12 @@ class TileType(Enum):
         self.tileset_id = tileset_id
         self.attributes = 0
         for attribute in attributes:
+            # bitwise or - combines each binaru number into one number
+            # a TileType with WATER and COLLIDE would look like 1001
             self.attributes = self.attributes | attribute.value
 
     def has_attribute(self, attribute):
+        # bitwise and - sees if one binaru number contains another
         return self.attributes & attribute.value == attribute.value
 
 
