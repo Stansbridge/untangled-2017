@@ -25,8 +25,8 @@ white = (255,255,255)
 black = (0,0,0)
 red = (255, 0, 0)
 
-width = 1024
-height = 1024
+width = 3840
+height = 2160
 
 font = 'assets/fonts/alterebro-pixel-font.ttf'
 level_tileset_path = 'assets/tilesets/main.png'
@@ -51,7 +51,7 @@ class GameClient():
 
     def setup_pygame(self):
         # Initialise screen/display
-        self.screen = pygame.display.set_mode((width, height), pygame.HWSURFACE)
+        self.screen = pygame.display.set_mode((width, height), pygame.HWSURFACE | pygame.FULLSCREEN)
 
         # Initialise fonts.
         pygame.font.init()
@@ -71,13 +71,13 @@ class GameClient():
             pygame.locals.KEYDOWN])
 
         self.levels = {
-            "main": ProceduralLevel(4343438483844)
+            "main": ProceduralLevel(42)
         }
 
         self.map = Map(
             self.screen,
             self.levels.get("main"),
-            Tileset(pygame.image.load('assets/tilesets/main.png').convert(), (16, 16)),
+            Tileset(level_tileset_path, (16, 16), (32, 32)),
             Music('assets/music/song.mp3')
         )
         self.map.music.load_music()

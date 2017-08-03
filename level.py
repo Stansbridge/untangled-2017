@@ -18,7 +18,8 @@ class Level():
         elif y < 0 or y >= self.height:
             return False
         elif self.get_tile(x, y).has_attribute(TileAttribute.COLLIDE):
-            return False
+            # return False
+            return True
         return True
 
 
@@ -27,7 +28,7 @@ class ProceduralLevel(Level):
         self.openSimplex = OpenSimplex(seed)
         self.load_tiles()
 
-    def load_tiles(self, width = 50, height = 50):
+    def load_tiles(self, width = 1000, height = 1000):
         self.width = width
         self.height = height
         self.grid = [

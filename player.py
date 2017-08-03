@@ -7,7 +7,7 @@ import configparser
 from pygame.rect import Rect
 
 import client
-from tileset import Tileset
+from tile import Tileset
 import map as map_module
 
 
@@ -28,9 +28,9 @@ class Player():
         self.ready = False
         self.is_centre = False
         self.size = (map_module.TILE_PIX_WIDTH, map_module.TILE_PIX_HEIGHT)
-        self.step = 1
+        self.step = 16
         self.colour = colour
-        self.tileset = Tileset(client.player_animation_tileset_path, (32, 32), {}, (32, 32))
+        self.tileset = Tileset(client.player_animation_tileset_path, (3, 4), (32, 32))
         self.name = 'Name'
         self.initial_position = (0, 0)
         self.set_position(self.initial_position)
@@ -91,7 +91,7 @@ class Player():
         )
 
         self.screen.blit(name_tag, name_tag_pos)
-        self.screen.blit(self.tileset.get_tile_by_id(1).subsurface, centre)
+        self.screen.blit(self.tileset.get_surface_by_id(0), centre)
         # pygame.draw.rect(self.screen, self.colour, Rect(centre, self.size))
 
     def move(self, direction):
