@@ -90,7 +90,7 @@ class Tileset():
                 else:
                     self.tiles[id] = Tile(self.get_attributes(id), self.find_subsurface(id))
 
-class TileMusic():
+class LevelMusic():
     def __init__(self, location):
         self.location = location
 

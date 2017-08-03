@@ -63,12 +63,12 @@ class GameClient():
         self.levels = {
               "main": ProceduralLevel("main", Tileset(pygame.image.load('assets/tilesets/main.png').convert(), (64, 64), {
                 6: TileTypes.COLLIDE.value
-                }, (32, 32)), TileMusic('assets/music/song.mp3'), 4343438483844)
+                }, (32, 32)), LevelMusic('assets/music/song.mp3'), 4343438483844)
         }
 
         self.map = Map(self.screen, self.levels.get("main"), (32, 32))
         self.map.level.music.load_music()
-        TileMusic.play_music_repeat()
+        LevelMusic.play_music_repeat()
 
     def set_state(self, new_state):
         if(new_state and new_state != self.game_state):
