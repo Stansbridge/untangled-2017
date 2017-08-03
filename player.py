@@ -7,6 +7,7 @@ import configparser
 from pygame.rect import Rect
 
 import client
+from map import TILE_PIX_WIDTH, TILE_PIX_HEIGHT
 
 class Movement(Enum):
     UP = 1
@@ -24,8 +25,8 @@ class Player():
         self.map = map
         self.ready = False
         self.is_centre = False
-        self.size = (32, 32)
-        self.step = self.size[0]
+        self.size = (TILE_PIX_WIDTH, TILE_PIX_HEIGHT)
+        self.step = 1
         self.colour = colour
         self.name = 'Name'
 
@@ -74,30 +75,21 @@ class Player():
 
     def set_position(self, position):
         self.x, self.y = position
-        print('X: {0} Y: {1}'.format(self.x // self.size[0], self.y // self.size[1]))
         self.ready = True
 
     def render(self):
-        centre = self.map.get_centre()
-
         font = pygame.font.Font(client.font, 30)
-
         name_tag = font.render(self.name, False, (255, 255, 255))
 
-        if not self.is_centre:
-            centre = (
-                self.x - self.map.centre_player.x + centre[0],
-                self.y - self.map.centre_player.y + centre[1]
-            )
-
+        centre = self.map.get_pixel_pos(self.x, self.y)
+        
         name_tag_pos = (
-                centre[0] + ((self.size[0] - name_tag.get_width()) // 2),
-                centre[1] - ((self.size[1] + name_tag.get_height()) // 2)
+            centre[0] + ((self.size[0] - name_tag.get_width()) // 2),
+            centre[1] - ((self.size[1] + name_tag.get_height()) // 2)
         )
 
         self.screen.blit(name_tag, name_tag_pos)
         pygame.draw.rect(self.screen, self.colour, Rect(centre, self.size))
-
 
     def move(self, direction):
         if not self.ready:
@@ -117,7 +109,7 @@ class Player():
         elif direction == Movement.LEFT:
             tmp_x -= self.step
 
-        if not self.map.can_move_to(tmp_x, tmp_y):
+        if not self.map.level.can_move_to(tmp_x, tmp_y):
             return
 
         self.set_position(Position(tmp_x, tmp_y))
