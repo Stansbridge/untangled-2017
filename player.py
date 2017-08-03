@@ -6,6 +6,8 @@ import pygame
 import configparser
 from pygame.rect import Rect
 
+import client
+import map as map_module
 
 class Movement(Enum):
     UP = 1
@@ -18,19 +20,18 @@ class PlayerException(Exception):
     pass
 
 class Player():
-    def __init__(self, screen, map, position=(0, 0), size=(32, 32), colour=(255, 255, 255), name = "Name"):
+    def __init__(self, screen, map, colour=(255, 255, 255)):
         self.screen = screen
         self.map = map
         self.ready = False
         self.is_centre = False
-        self.size = size
-        self.step = self.size[0]
+        self.size = (map_module.TILE_PIX_WIDTH, map_module.TILE_PIX_HEIGHT)
+        self.step = 1
         self.colour = colour
-        self.name = name
+        self.name = 'Name'
 
-        if len(position) > 0:
-            self.initial_position = position
-            self.set_position(position)
+        self.initial_position = (0, 0)
+        self.set_position(self.initial_position)
 
     def __raiseNoPosition(self):
         raise PlayerException({"message": "Player does not have a position set", "player": self})
@@ -74,27 +75,21 @@ class Player():
 
     def set_position(self, position):
         self.x, self.y = position
-        print('X: {0} Y: {1}'.format(self.x // self.size[0], self.y // self.size[1]))
         self.ready = True
 
     def render(self):
-        centre = self.map.get_centre()
-        font = pygame.font.Font(None, 30)
-        font.set_bold(True)
-        box = font.render(self.name, False, (255, 255, 255))
+        font = pygame.font.Font(client.font, 30)
+        name_tag = font.render(self.name, False, (255, 255, 255))
 
+        centre = self.map.get_pixel_pos(self.x, self.y)
+        
+        name_tag_pos = (
+            centre[0] + ((self.size[0] - name_tag.get_width()) // 2),
+            centre[1] - ((self.size[1] + name_tag.get_height()) // 2)
+        )
 
-        if(self.is_centre):
-            self.screen.blit(box, (centre[0], centre[1] - 20)) # Draws name above centre player
-            pygame.draw.rect(self.screen, self.colour, Rect(centre, self.size))
-        else:
-            offset_centre = (
-                self.x - self.map.centre_player.x + centre[0],
-                self.y - self.map.centre_player.y + centre[1]
-            )
-            self.screen.blit(box, (offset_centre[0], offset_centre[1] - 20)) # Draws name above another player
-            pygame.draw.rect(self.screen, self.colour, Rect(offset_centre, self.size))
-
+        self.screen.blit(name_tag, name_tag_pos)
+        pygame.draw.rect(self.screen, self.colour, Rect(centre, self.size))
 
     def move(self, direction):
         if not self.ready:
@@ -114,19 +109,7 @@ class Player():
         elif direction == Movement.LEFT:
             tmp_x -= self.step
 
-        tile_attribs = self.map.get_tile_attributes(tmp_x, tmp_y)
-
-        # Import TileTypes information Enum.
-        from map import TileTypes
-
-        # TODO: Prevent the player from moving beyond the bounds of the map.
-
-        # If the tile_attribs includes "TileTypes.COLLIDE" record this as a collision.
-        if(tile_attribs & TileTypes.COLLIDE.value):
-            collision = True
-
-        # If a collision has occurred return before the player has moved.
-        if(collision):
+        if not self.map.level.can_move_to(tmp_x, tmp_y):
             return
 
         self.set_position(Position(tmp_x, tmp_y))

@@ -18,10 +18,18 @@ from map import *
 from network import Network
 from player import *
 from screen import MainMenu
+from level import ProceduralLevel
+from tile import Tileset
+
 
 white = (255,255,255)
 black = (0,0,0)
 red = (255, 0, 0)
+
+width = 1024
+height = 1024
+
+font = 'assets/fonts/alterebro-pixel-font.ttf'
 
 class GameState(Enum):
     MENU = 0
@@ -38,9 +46,10 @@ class GameClient():
         self.setup_pygame()
         self.players = PlayerManager(Player(self.screen, self.map))
         self.map.set_centre_player(self.players.me)
-        self.menu = MainMenu(self.screen, 'assets/fonts/alterebro-pixel-font.ttf', self.players)
+        self.menu = MainMenu(self.screen, self.players)
 
-    def setup_pygame(self, width=1024, height=1024):
+    def setup_pygame(self):
+        # Initialise screen/display
         self.screen = pygame.display.set_mode((width, height), pygame.HWSURFACE)
 
         # Initialise fonts.
@@ -61,13 +70,16 @@ class GameClient():
             pygame.locals.KEYDOWN])
 
         self.levels = {
-              "main": ProceduralLevel("main", Tileset(pygame.image.load('assets/tilesets/main.png').convert(), (64, 64), {
-                6: TileTypes.COLLIDE.value
-                }, (32, 32)), LevelMusic('assets/music/song.mp3'), 4343438483844)
+            "main": ProceduralLevel(4343438483844)
         }
 
-        self.map = Map(self.screen, self.levels.get("main"), (32, 32))
-        self.map.level.music.load_music()
+        self.map = Map(
+            self.screen,
+            self.levels.get("main"),
+            Tileset(pygame.image.load('assets/tilesets/main.png').convert(), (16, 16)),
+            LevelMusic('assets/music/song.mp3')
+        )
+        self.map.music.load_music()
         LevelMusic.play_music_repeat()
 
     def set_state(self, new_state):
@@ -90,7 +102,7 @@ class GameClient():
                 self.screen.fill((white))
                 clock.tick(tickspeed)
                 if(self.game_state.value == GameState.MENU.value):
-                    self.menu.render((self.map.screen_size[0] * 0.45, self.map.screen_size[1]*0.4))
+                    self.menu.render((self.map.screen.get_width() * 0.45, self.map.screen.get_height()*0.4))
                     for event in pygame.event.get():
                         if event.type == pygame.QUIT or event.type == pygame.locals.QUIT:
                             running = False
@@ -171,7 +183,7 @@ class GameClient():
                         y_axis = joystick.get_axis(1)
                         x_axis = joystick.get_axis(0)
 
-                        if joystick.get_axis(1) == 0: #Indicates no motion.
+                        if y_axis == 0 and x_axis == 0: #Indicates no motion.
                             neutral = True
                             pressed = 0
                         else:
