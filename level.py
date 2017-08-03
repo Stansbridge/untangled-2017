@@ -23,7 +23,7 @@ class Level():
 
 
 class ProceduralLevel(Level):
-    def __init__(self, seed, width = 250, height = 250):
+    def __init__(self, seed, width = 50, height = 50):
         self.openSimplex = OpenSimplex(seed)
         self.load_tiles(width, height)
 

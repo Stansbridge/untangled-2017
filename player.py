@@ -77,6 +77,9 @@ class Player():
         self.name = name
         if save: self.save_to_config()
 
+    def set_tileset(self, tileset):
+        self.tileset = tileset
+
     def set_position(self, position):
         # Derive direction (for networked players)
         if self.x < position[0]:

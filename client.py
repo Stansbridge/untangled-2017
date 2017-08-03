@@ -45,7 +45,8 @@ class GameClient():
     def __init__(self):
         self.network = Network()
         self.setup_pygame()
-        self.players = PlayerManager(Player(self.screen, self.map))
+        me = Player(self.screen, self.map)
+        self.players = PlayerManager(me)
         self.map.set_centre_player(self.players.me)
         self.menu = MainMenu(self.screen, self.players)
 
@@ -88,7 +89,7 @@ class GameClient():
             self.game_state = new_state
 
             if(self.game_state.value == GameState.PLAY.value):
-                pygame.key.set_repeat(85, 85)
+                pygame.key.set_repeat(50, 50)
             else:
                 pygame.key.set_repeat(0, 0)
 
