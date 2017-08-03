@@ -20,7 +20,7 @@ from player import *
 from screen import MainMenu
 from level import ProceduralLevel
 from tile import Tileset
-
+from music import LevelMusic
 
 white = (255,255,255)
 black = (0,0,0)
