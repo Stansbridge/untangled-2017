@@ -14,6 +14,7 @@ class Movement(Enum):
     DOWN = 3
     LEFT = 4
 Position = namedtuple('Position', ['x', 'y'])
+SpellProperties = namedtuple('SpellProperties', ['x', 'y', 'x_velocity', 'y_velocity',])
 
 class Action(Enum):
     SPELL = 1
@@ -107,10 +108,6 @@ class Player():
                 centre[1] - ((self.size[1] + name_tag.get_height()) // 2)
         )
 
-        # Check if the user has cast a spell.
-        if self.cast_spell is not None:
-            self.cast_spell.render()
-
         self.screen.blit(name_tag, name_tag_pos)
         pygame.draw.rect(self.screen, self.colour, Rect(centre, self.size))
 
@@ -171,27 +168,32 @@ class Spell():
 
         self.set_position(position)
 
-    def render(self):
+    def render(self, is_centre, player_position):
         position = (
             self.player.map.get_centre()[0] + self.x_distance,
             self.player.map.get_centre()[1] + self.y_distance
         )
 
-        if not self.player.is_centre:
+        if not is_centre:
             position = (
-                self.x - self.player.map.centre_player.x + position[0] + self.x_distance,
-                self.y - self.player.map.centre_player.y + position[1] + self.y_distance
+                player_position[0] - self.player.map.centre_player.x + position[0],
+                player_position[1] - self.player.map.centre_player.y + position[1]
             )
 
         pygame.draw.rect(self.player.screen, self.colour, Rect(position, self.size))
+
+        # Increment distances to track how far the projectile has travelled.
         self.x_distance += self.x_velocity
         self.y_distance += self.y_velocity
 
-    def get_position(self):
-        return Position(self.x, self.y)
+    def get_properties(self):
+        return SpellProperties(self.x, self.y, self.x_velocity, self.y_velocity)
 
-    def set_position(self, position):
-        self.x, self.y = position
+    def set_properties(self, properties):
+        self.x, self.y, self.x_velocity, self.y_velocity = properties
+
+    def set_position(self, new_position):
+        self.x, self.y = new_position
 
     def hit_target(self,player): # Return if the spell has hit another player.
         return self.rect.colliderect(player.map.get_tile_attributes(player.x, player.y))
