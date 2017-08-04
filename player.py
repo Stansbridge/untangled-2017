@@ -35,11 +35,12 @@ class Player():
         self.size = (map_module.TILE_PIX_WIDTH, map_module.TILE_PIX_HEIGHT)
         self.step = 1
         self.colour = colour
+        self.cast_spells = []
+        self.spell_limit = 50
         self.mute = 'True'
         self.tileset = Tileset(client.player_animation_tileset_path, (3, 4), (32, 32))
         self.name = ''
         self.x, self.y = (0, 0)
-        self.cast_spell = None
         self.initial_position = (0, 0)
         self.animation_ticker = 0
         self.set_position(self.initial_position)
@@ -119,7 +120,13 @@ class Player():
         )
 
         self.screen.blit(name_tag, name_tag_pos)
-        self.screen.blit(self.tileset.get_surface_by_id(self.animation_ticker), centre)
+
+        sprite = self.tileset.get_surface_by_id(self.animation_ticker)
+        self.screen.blit(sprite, centre)
+
+        # create collision rectangle
+        self.rect = sprite.get_rect()
+        self.rect.topleft = centre
 
     def move(self, direction):
         if not self.ready:
@@ -152,13 +159,18 @@ class Player():
     def attack(self, action, direction):
         if action == Action.SPELL:
             if direction == Movement.UP:
-                self.cast_spell = Spell(self, (0, -0.25))
+                spell = Spell(self, (0, -0.25))
             elif direction == Movement.RIGHT:
-                self.cast_spell = Spell(self, (0.25, 0))
+                spell = Spell(self, (0.25, 0))
             elif direction == Movement.DOWN:
-                self.cast_spell = Spell(self, (0, 0.25))
+                spell = Spell(self, (0, 0.25))
             elif direction == Movement.LEFT:
-                self.cast_spell = Spell(self, (-0.25, 0))
+                spell = Spell(self, (-0.25, 0))
+
+            # Remove first element of list if limit reached.
+            if len(self.cast_spells) > self.spell_limit:
+                self.cast_spells[1:]
+            self.cast_spells.append(spell)
         elif action == Action.SWIPE:
             #TODO
             return
@@ -168,7 +180,6 @@ class Spell():
         self.player = player
         self.size = size
         self.colour = colour
-
         if position == None:
             # spawn at player - additional maths centres the spell
             self.x = self.player.x + 0.5 - (size[0] / 2)
@@ -184,7 +195,7 @@ class Spell():
             self.size[0] * map_module.TILE_PIX_WIDTH,
             self.size[1] * map_module.TILE_PIX_HEIGHT
         )
-        pygame.draw.rect(self.player.screen, self.colour, Rect(pixel_pos, pixel_size))
+        self.rect = pygame.draw.rect(self.player.screen, self.colour, Rect(pixel_pos, pixel_size))
 
         # move the projectile by its velocity
         self.x += self.velo_x
@@ -202,6 +213,10 @@ class Spell():
     def set_velocity(self, velocity):
         self.velo_x, self.velo_y = velocity
 
+    def hit_target(self, target):
+        if self.rect.colliderect(target.rect):
+            # TODO - decide on what to do with collision
+            pass
 
 class PlayerManager():
     def __init__(self, me):
