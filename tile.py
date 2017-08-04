@@ -17,7 +17,7 @@ class TileAttribute(Enum):
 
 class TileType(Enum):
     DIRT = (2, [])
-    BRICK = (7, [ TileAttribute.COLLIDE ])
+    BRICK = (1, [ TileAttribute.COLLIDE ])
 
     def __init__(self, tileset_id, attributes):
         self.tileset_id = tileset_id
@@ -34,19 +34,19 @@ class TileType(Enum):
 
 class Tileset():
     def __init__(self, image, grid_dimensions, render_dimensions=(map.TILE_PIX_WIDTH, map.TILE_PIX_HEIGHT)):
-        self.image = image
+        self.image = pygame.image.load(image)
         self.grid_dimensions = grid_dimensions
         self.render_dimensions = render_dimensions
         self.surfaces = {}
 
-    def get_surface(self, id):
+    def get_surface_by_id(self, id):
         if id in self.surfaces:
             return self.surfaces[id]
 
         clip_x, clip_y = self.find_position(id)
 
-        cur_tile_width = (self.image.get_width() / self.grid_dimensions[0])
-        cur_tile_height = (self.image.get_height() / self.grid_dimensions[1])
+        cur_tile_width = (self.image.get_width() // self.grid_dimensions[0])
+        cur_tile_height = (self.image.get_height() // self.grid_dimensions[1])
 
         clip_rect = (
             cur_tile_width * clip_x,
@@ -68,4 +68,4 @@ class Tileset():
         return (x, y)
 
     def find_id(self, x, y):
-        return y * (self.width // self.grid_dimensions[0]) + x
+        return y * self.grid_dimensions[1] + x

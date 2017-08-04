@@ -29,7 +29,7 @@ class Map():
                 # TODO more readable ranges please
                 # for every tile in between
                 pixel_pos = self.get_pixel_pos(x, y)
-                tile_image = self.tileset.get_surface(self.level.get_tile(x, y).tileset_id)
+                tile_image = self.tileset.get_surface_by_id(self.level.get_tile(x, y).tileset_id)
                 self.screen.blit(tile_image, (pixel_pos[0], pixel_pos[1]))
 
     def get_pixel_pos(self, x, y):
