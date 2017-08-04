@@ -95,6 +95,8 @@ class GameClient():
         running = True
         clock = pygame.time.Clock()
         tickspeed = 60
+        last_direction = None
+        cast = False # Flag for when player casts spell.
 
         try:
 
@@ -128,46 +130,27 @@ class GameClient():
                         elif event.type == pygame.locals.KEYDOWN:
                             if event.key == pygame.locals.K_UP:
                                 me.move(Movement.UP)
+                                last_direction = Movement.UP
                             elif event.key == pygame.locals.K_DOWN:
                                 me.move(Movement.DOWN)
+                                last_direction = Movement.DOWN
                             elif event.key == pygame.locals.K_LEFT:
                                 me.move(Movement.LEFT)
+                                last_direction = Movement.LEFT
                             elif event.key == pygame.locals.K_RIGHT:
                                 me.move(Movement.RIGHT)
+                                last_direction = Movement.RIGHT
+                            elif event.key == pygame.locals.K_RETURN:
+                                cast = True
+                                if last_direction == Movement.LEFT:
+                                    me.attack(Action.SPELL, Movement.LEFT)
+                                elif last_direction == Movement.UP:
+                                    me.attack(Action.SPELL, Movement.UP)
+                                elif last_direction == Movement.DOWN:
+                                    me.attack(Action.SPELL, Movement.DOWN)
+                                else:
+                                    me.attack(Action.SPELL, Movement.RIGHT)
                             pygame.event.clear(pygame.locals.KEYDOWN)
-
-                    self.map.render()
-                    me.render()
-
-                    self.players.set(self.network.node.peers())
-                    # check network
-                    events = self.network.get_events()
-                    if events:
-                        try:
-                            for event in self.network.get_events():
-                                print(event.peer_uuid, event.type, event.group, event.msg)
-
-                                if event.group == "world:position":
-                                    new_position = bson.loads(event.msg[0])
-                                    network_player = self.players.get(event.peer_uuid)
-
-                                    if network_player:
-                                        network_player.set_position(Position(**new_position))
-                        except Exception as e:
-                            print(e)
-                            pass
-
-                    # if there are other peers we can start sending to groups
-                    if self.players.others:
-                        self.network.node.shout("world:position", bson.dumps(me.get_position()._asdict()))
-
-                    for playerUUID, player in self.players.others.items():
-                        try:
-                            player.render()
-                        except PlayerException as e:
-                            # PlayerException due to no initial position being set for that player
-                            print(e)
-                            pass
 
                     # https://stackoverflow.com/a/15596758/3954432
                     # Handle controller input by setting flags (move, neutral)
@@ -199,14 +182,65 @@ class GameClient():
                             # up/down
                             if y_axis > 0.5:
                                 me.move(Movement.DOWN)
+                                last_direction = Movement.DOWN
                             if y_axis < -0.5:
                                 me.move(Movement.UP)
+                                last_direction = Movement.UP
                             # left/right
                             if x_axis > 0.5:
                                 me.move(Movement.RIGHT)
+                                last_direction = Movement.RIGHT
                             if x_axis < -0.5:
                                 me.move(Movement.LEFT)
+                                last_direction = Movement.LEFT
                         last_update = pygame.time.get_ticks()
+
+                    self.map.render()
+                    me.render()
+                    if me.cast_spell:
+                        me.cast_spell.render()
+
+                    self.players.set(self.network.node.peers())
+                    # check network
+                    events = self.network.get_events()
+                    if events:
+                        try:
+                            for event in self.network.get_events():
+                                print(event.peer_uuid, event.type, event.group, event.msg)
+
+                                if event.group == "world:position":
+                                    new_position = bson.loads(event.msg[0])
+                                    network_player = self.players.get(event.peer_uuid)
+                                if event.group == "world:combat":
+                                    new_spell_properties = bson.loads(event.msg[0])
+                                    network_spell_caster = self.players.get(event.peer_uuid)
+                                    network_spell_caster.cast_spell = Spell(network_spell_caster, (0, 0))
+                                    network_spell_caster.cast_spell.set_properties(SpellProperties(**new_spell_properties))
+
+                                if network_player:
+                                    network_player.set_position(Position(**new_position))
+
+                        except Exception as e:
+                            print(e)
+                            import traceback
+                            print(traceback.format_exc())
+                            pass
+
+                    # if there are other peers we can start sending to groups
+                    if self.players.others:
+                        self.network.node.shout("world:position", bson.dumps(me.get_position()._asdict()))
+                        if cast == True:
+                            self.network.node.shout("world:combat", bson.dumps(me.cast_spell.get_properties()._asdict()))
+                            cast = False
+                    for playerUUID, player in self.players.others.items():
+                        try:
+                            player.render()
+                            if player.cast_spell:
+                                player.cast_spell.render()
+                        except PlayerException as e:
+                            # PlayerException due to no initial position being set for that player
+                            print(e)
+                            pass
 
                 pygame.display.update()
         finally:
