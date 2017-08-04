@@ -237,6 +237,8 @@ class GameClient():
                             player.render()
                             if player.cast_spell:
                                 player.cast_spell.render()
+                                player.cast_spell.hit_target(me)
+
                         except PlayerException as e:
                             # PlayerException due to no initial position being set for that player
                             print(e)

@@ -95,7 +95,7 @@ class Player():
         )
 
         self.screen.blit(name_tag, name_tag_pos)
-        pygame.draw.rect(self.screen, self.colour, Rect(centre, self.size))
+        self.rect = pygame.draw.rect(self.screen, self.colour, Rect(centre, self.size))
 
     def move(self, direction):
         if not self.ready:
@@ -145,7 +145,6 @@ class Spell():
         self.player = player
         self.size = size
         self.colour = colour
-
         if position == None:
             # spawn at player - additional maths centres the spell
             self.x = self.player.x + 0.5 - (size[0] / 2)
@@ -161,7 +160,7 @@ class Spell():
             self.size[0] * map_module.TILE_PIX_WIDTH,
             self.size[1] * map_module.TILE_PIX_HEIGHT
         )
-        pygame.draw.rect(self.player.screen, self.colour, Rect(pixel_pos, pixel_size))
+        self.rect = pygame.draw.rect(self.player.screen, self.colour, Rect(pixel_pos, pixel_size))
 
         # move the projectile by its velocity
         self.x += self.velo_x
@@ -179,6 +178,9 @@ class Spell():
     def set_velocity(self, velocity):
         self.velo_x, self.velo_y = velocity
 
+    def hit_target(self, target):
+        if self.rect.colliderect(target.rect):
+            #TODO - decide on what to do with collision
 
 class PlayerManager():
     def __init__(self, me):
