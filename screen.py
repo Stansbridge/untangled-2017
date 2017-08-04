@@ -49,8 +49,11 @@ class MainMenu(Screen):
             'Help': {
                 'pos': 2,
             },
-            'Quit': {
+            'Mute': {
                 'pos': 3,
+            },
+            'Quit': {
+                'pos': 4,
             }
         }
         self.resume_options = {
@@ -60,8 +63,11 @@ class MainMenu(Screen):
             'Save': {
                 'pos': 1,
             },
-            'Quit': {
+            'Mute': {
                 'pos': 2,
+            },
+            'Quit': {
+                'pos': 3,
             }
         }
 
@@ -154,6 +160,9 @@ class MainMenu(Screen):
                         #HELP
                         return GameState.HELP
                     elif(self.selected == 3):
+                        #MUTE
+                        return GameState.MUTE
+                    elif(self.selected == 4):
                         #QUIT
                         return GameState.QUIT
         elif(self.state == MenuState.RESUME):
@@ -170,6 +179,9 @@ class MainMenu(Screen):
                         self.info_message = 'Successfully Saved! :-)'
                         return GameState.MENU
                     elif(self.selected == 2):
+                        #QUIT
+                        return GameState.MUTE
+                    elif(self.selected == 3):
                         #QUIT
                         return GameState.QUIT
         elif(self.state == MenuState.CHAR_SETUP):
@@ -188,5 +200,3 @@ class MainMenu(Screen):
                         self.selected = 0
                         return GameState.PLAY
         return
-
-

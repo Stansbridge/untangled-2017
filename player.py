@@ -7,7 +7,9 @@ import configparser
 from pygame.rect import Rect
 
 import client
+from tile import Tileset
 import map as map_module
+
 
 class Movement(Enum):
     UP = 1
@@ -33,11 +35,14 @@ class Player():
         self.size = (map_module.TILE_PIX_WIDTH, map_module.TILE_PIX_HEIGHT)
         self.step = 1
         self.colour = colour
-        self.name = 'Name'
         self.cast_spells = []
         self.spell_limit = 50
-
+        self.mute = 'True'
+        self.tileset = Tileset(client.player_animation_tileset_path, (3, 4), (32, 32))
+        self.name = ''
+        self.x, self.y = (0, 0)
         self.initial_position = (0, 0)
+        self.animation_ticker = 0
         self.set_position(self.initial_position)
 
     def __raiseNoPosition(self):
@@ -51,6 +56,7 @@ class Player():
         config['Player']['name'] = self.name
         config['Player']['x'] = str(self.x)
         config['Player']['y'] = str(self.y)
+        config['Player']['mute'] = str(self.mute)
 
         with open('player_save', 'w') as configfile:
             config.write(configfile)
@@ -71,7 +77,7 @@ class Player():
                     int(player_save_info['y'])
                 )
             )
-
+            self.set_mute(player_save_info.get('mute', 'True'))
             return True
 
         return False
@@ -80,9 +86,27 @@ class Player():
         self.name = name
         if save: self.save_to_config()
 
+    def set_tileset(self, tileset):
+        self.tileset = tileset
+
     def set_position(self, position):
+        # Derive direction (for networked players)
+        if self.x < position[0]:
+            self.animation_ticker = self.tileset.find_id(self.x % 3, 2)
+        elif self.x > position[0]:
+            self.animation_ticker = self.tileset.find_id(self.x % 3, 1)
+
+        if self.y < position[1]:
+            self.animation_ticker = self.tileset.find_id(self.y % 3, 0)
+        elif self.y > position[1]:
+            self.animation_ticker = self.tileset.find_id(self.y % 3, 3)
+
         self.x, self.y = position
         self.ready = True
+
+    def set_mute(self, mute, save = False):
+        self.mute = mute
+        if save: self.save_to_config()
 
     def render(self):
         font = pygame.font.Font(client.font, 30)
@@ -96,23 +120,28 @@ class Player():
         )
 
         self.screen.blit(name_tag, name_tag_pos)
-        self.rect = pygame.draw.rect(self.screen, self.colour, Rect(centre, self.size))
+
+        sprite = self.tileset.get_surface_by_id(self.animation_ticker)
+        self.screen.blit(sprite, centre)
+
+        # create collision rectangle
+        self.rect = sprite.get_rect()
+        self.rect.topleft = centre
 
     def move(self, direction):
         if not self.ready:
             self.__raiseNoPosition()
-
-        collision = False
 
         tmp_x = self.x
         tmp_y = self.y
 
         if direction == Movement.UP:
             tmp_y -= self.step
-        elif direction == Movement.RIGHT:
-            tmp_x += self.step
         elif direction == Movement.DOWN:
             tmp_y += self.step
+
+        if direction == Movement.RIGHT:
+            tmp_x += self.step
         elif direction == Movement.LEFT:
             tmp_x -= self.step
 

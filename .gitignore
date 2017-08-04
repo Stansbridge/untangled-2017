@@ -102,3 +102,6 @@ ENV/
 
 # save file
 player_save
+
+# MY IDE
+.idea

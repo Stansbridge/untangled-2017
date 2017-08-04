@@ -30,6 +30,8 @@ width = 1024
 height = 1024
 
 font = 'assets/fonts/alterebro-pixel-font.ttf'
+level_tileset_path = 'assets/tilesets/main.png'
+player_animation_tileset_path = 'assets/tilesets/player.png'
 
 class GameState(Enum):
     MENU = 0
@@ -37,6 +39,7 @@ class GameState(Enum):
     HELP = 2
     CHARACTER = 3
     QUIT = 4
+    MUTE = 5
 
 class GameClient():
     game_state = GameState.MENU
@@ -44,7 +47,8 @@ class GameClient():
     def __init__(self):
         self.network = Network()
         self.setup_pygame()
-        self.players = PlayerManager(Player(self.screen, self.map))
+        me = Player(self.screen, self.map)
+        self.players = PlayerManager(me)
         self.map.set_centre_player(self.players.me)
         self.menu = MainMenu(self.screen, self.players)
 
@@ -70,17 +74,16 @@ class GameClient():
             pygame.locals.KEYDOWN])
 
         self.levels = {
-            "main": ProceduralLevel(4343438483844)
+            "main": ProceduralLevel(42)
         }
 
         self.map = Map(
             self.screen,
             self.levels.get("main"),
-            Tileset(pygame.image.load('assets/tilesets/main.png').convert(), (16, 16)),
+            Tileset(level_tileset_path, (16, 16), (32, 32)),
             LevelMusic('assets/music/song.mp3')
         )
         self.map.music.load_music()
-        LevelMusic.play_music_repeat()
 
     def set_state(self, new_state):
         if(new_state and new_state != self.game_state):
@@ -97,9 +100,12 @@ class GameClient():
         tickspeed = 60
         last_direction = None
         cast = False # Flag for when player casts spell.
+        me = self.players.me
+
+        if me.mute == "False":
+            LevelMusic.play_music_repeat()
 
         try:
-
             while running:
                 self.screen.fill((white))
                 clock.tick(tickspeed)
@@ -117,9 +123,16 @@ class GameClient():
                 elif(self.game_state.value == GameState.HELP.value):
                     print("Help menu option pressed")
                     self.game_state = GameState.MENU
+                elif(self.game_state.value == GameState.MUTE.value):
+                    if me.mute == "False":
+                        me.set_mute("True", True)
+                        LevelMusic.stop_music()
+                    elif me.mute == "True":
+                        me.set_mute("False", True)
+                        LevelMusic.play_music_repeat()
+                    self.game_state = GameState.MENU
                 else:
                     # handle inputs
-                    me = self.players.me
                     for event in pygame.event.get():
                         if event.type == pygame.QUIT or event.type == pygame.locals.QUIT:
                             running = False
