@@ -197,8 +197,8 @@ class GameClient():
 
                     self.map.render()
                     me.render()
-                    if me.cast_spell:
-                        me.cast_spell.render()
+                    for spell in me.cast_spells:
+                        spell.render()
 
                     self.players.set(self.network.node.peers())
                     # check network
@@ -214,8 +214,8 @@ class GameClient():
                                 if event.group == "world:combat":
                                     new_spell_properties = bson.loads(event.msg[0])
                                     network_spell_caster = self.players.get(event.peer_uuid)
-                                    network_spell_caster.cast_spell = Spell(network_spell_caster, (0, 0))
-                                    network_spell_caster.cast_spell.set_properties(SpellProperties(**new_spell_properties))
+                                    network_spell_caster.cast_spells.append(Spell(network_spell_caster, (0, 0)))
+                                    network_spell_caster.cast_spells[-1].set_properties(SpellProperties(**new_spell_properties))
 
                                 if network_player:
                                     network_player.set_position(Position(**new_position))
@@ -230,14 +230,14 @@ class GameClient():
                     if self.players.others:
                         self.network.node.shout("world:position", bson.dumps(me.get_position()._asdict()))
                         if cast == True:
-                            self.network.node.shout("world:combat", bson.dumps(me.cast_spell.get_properties()._asdict()))
+                            self.network.node.shout("world:combat", bson.dumps(me.cast_spells[-1].get_properties()._asdict()))
                             cast = False
                     for playerUUID, player in self.players.others.items():
                         try:
                             player.render()
-                            if player.cast_spell:
-                                player.cast_spell.render()
-                                player.cast_spell.hit_target(me)
+                            for spell in player.cast_spells:
+                                spell.render()
+                                spell.hit_target(me)
 
                         except PlayerException as e:
                             # PlayerException due to no initial position being set for that player

@@ -34,7 +34,7 @@ class Player():
         self.step = 1
         self.colour = colour
         self.name = 'Name'
-        self.cast_spell = None
+        self.cast_spells = []
 
         self.initial_position = (0, 0)
         self.set_position(self.initial_position)
@@ -129,13 +129,14 @@ class Player():
     def attack(self, action, direction):
         if action == Action.SPELL:
             if direction == Movement.UP:
-                self.cast_spell = Spell(self, (0, -0.25))
+                spell = Spell(self, (0, -0.25))
             elif direction == Movement.RIGHT:
-                self.cast_spell = Spell(self, (0.25, 0))
+                spell = Spell(self, (0.25, 0))
             elif direction == Movement.DOWN:
-                self.cast_spell = Spell(self, (0, 0.25))
+                spell = Spell(self, (0, 0.25))
             elif direction == Movement.LEFT:
-                self.cast_spell = Spell(self, (-0.25, 0))
+                spell = Spell(self, (-0.25, 0))
+            self.cast_spells.append(spell)
         elif action == Action.SWIPE:
             #TODO
             return
@@ -180,7 +181,8 @@ class Spell():
 
     def hit_target(self, target):
         if self.rect.colliderect(target.rect):
-            #TODO - decide on what to do with collision
+            # TODO - decide on what to do with collision
+            pass
 
 class PlayerManager():
     def __init__(self, me):
