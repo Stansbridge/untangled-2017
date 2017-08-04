@@ -20,7 +20,7 @@ from player import *
 from screen import MainMenu
 from level import ProceduralLevel
 from tile import Tileset
-
+from music import LevelMusic
 
 white = (255,255,255)
 black = (0,0,0)
@@ -77,10 +77,10 @@ class GameClient():
             self.screen,
             self.levels.get("main"),
             Tileset(pygame.image.load('assets/tilesets/main.png').convert(), (16, 16)),
-            Music('assets/music/song.mp3')
+            LevelMusic('assets/music/song.mp3')
         )
         self.map.music.load_music()
-        self.map.music.play_music_repeat()
+        LevelMusic.play_music_repeat()
 
     def set_state(self, new_state):
         if(new_state and new_state != self.game_state):
