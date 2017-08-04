@@ -15,4 +15,6 @@ A top down game for Untangled 2017.
 ## Controls
 
 * Movement - Arrow keys
+* Swipe -
+* Cast Spell - Return
 * Action Button - Spacebar
