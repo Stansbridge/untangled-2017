@@ -101,6 +101,8 @@ class GameClient():
         last_direction = None
         cast = False # Flag for when player casts spell.
         me = self.players.me
+        moved = False
+        time_since_last_shout = 0
 
         if me.mute == "False":
             LevelMusic.play_music_repeat()
@@ -109,6 +111,9 @@ class GameClient():
             while running:
                 self.screen.fill((white))
                 clock.tick(tickspeed)
+                time = clock.tick()
+                time_since_last_shout += time
+
                 if(self.game_state.value == GameState.MENU.value):
                     self.menu.render((self.map.screen.get_width() * 0.45, self.map.screen.get_height()*0.4))
                     for event in pygame.event.get():
@@ -163,6 +168,7 @@ class GameClient():
                                     me.attack(Action.SPELL, Movement.DOWN)
                                 else:
                                     me.attack(Action.SPELL, Movement.RIGHT)
+                            moved = True
                             pygame.event.clear(pygame.locals.KEYDOWN)
 
                     # https://stackoverflow.com/a/15596758/3954432
@@ -241,7 +247,10 @@ class GameClient():
 
                     # if there are other peers we can start sending to groups
                     if self.players.others:
-                        self.network.node.shout("world:position", bson.dumps(me.get_position()._asdict()))
+                        if moved or time_since_last_shout > 0.1:
+                            self.network.node.shout("world:position", bson.dumps(me.get_position()._asdict()))
+                            moved = False
+                            time_since_last_shout = 0
                         if cast == True:
                             self.network.node.shout("world:combat", bson.dumps(me.cast_spells[-1].get_properties()._asdict()))
                             cast = False
