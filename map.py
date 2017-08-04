@@ -3,6 +3,7 @@ TILE_PIX_HEIGHT = 32
 
 import pygame
 import pygame.locals
+import os.path
 
 from enum import Enum
 
@@ -62,24 +63,3 @@ class Map():
         map_y = relative_y + self.centre_player.y
 
         return [map_x, map_y]
-
-
-class Music():
-    def __init__(self, location):
-        self.location = location
-
-    def load_music(self):
-        return pygame.mixer.music.load(self.location)
-
-    # Play the music a given number of times.
-    # -1 will play on repeat, 0 will play once and so on...
-    def play_music(self, count):
-        pygame.mixer.music.play(count)
-
-    def play_music_repeat(self):
-        pygame.mixer.music.play(-1)
-
-    def stop_music(self):
-        pygame.mixer.music.stop()
-
-
