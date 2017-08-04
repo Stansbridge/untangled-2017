@@ -143,13 +143,13 @@ class GameClient():
                             elif event.key == pygame.locals.K_RETURN:
                                 cast = True
                                 if last_direction == Movement.LEFT:
-                                    me.attack(Action.SPELL, Action_Direction.LEFT)
+                                    me.attack(Action.SPELL, Movement.LEFT)
                                 elif last_direction == Movement.UP:
-                                    me.attack(Action.SPELL, Action_Direction.UP)
+                                    me.attack(Action.SPELL, Movement.UP)
                                 elif last_direction == Movement.DOWN:
-                                    me.attack(Action.SPELL, Action_Direction.DOWN)
+                                    me.attack(Action.SPELL, Movement.DOWN)
                                 else:
-                                    me.attack(Action.SPELL, Action_Direction.RIGHT)
+                                    me.attack(Action.SPELL, Movement.RIGHT)
                             pygame.event.clear(pygame.locals.KEYDOWN)
 
                     # https://stackoverflow.com/a/15596758/3954432

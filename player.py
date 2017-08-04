@@ -21,12 +21,6 @@ class Action(Enum):
     SPELL = 1
     SWIPE = 2
 
-class Action_Direction(Enum):
-    UP = 1
-    RIGHT = 2
-    DOWN = 3
-    LEFT = 4
-
 class PlayerException(Exception):
     pass
 
@@ -133,16 +127,14 @@ class Player():
         return Position(self.x, self.y)
 
     def attack(self, action, direction):
-        centre = self.map.get_centre()
-
         if action == Action.SPELL:
-            if direction == Action_Direction.UP:
+            if direction == Movement.UP:
                 self.cast_spell = Spell(self, 0, -10)
-            elif direction == Action_Direction.RIGHT:
+            elif direction == Movement.RIGHT:
                 self.cast_spell = Spell(self, 10, 0)
-            elif direction == Action_Direction.DOWN:
+            elif direction == Movement.DOWN:
                 self.cast_spell = Spell(self, 0, 10)
-            elif direction == Action_Direction.LEFT:
+            elif direction == Movement.LEFT:
                 self.cast_spell = Spell(self, -10, 0)
         elif action == Action.SWIPE:
             #TODO
@@ -161,9 +153,10 @@ class Spell():
         self.set_position(position)
 
     def render(self, is_centre, player_position):
+        centre = self.player.map.get_pixel_pos(player_position[0], player_position[1])
         position = (
-            self.player.map.get_centre()[0] + self.x_distance,
-            self.player.map.get_centre()[1] + self.y_distance
+            centre[0] + self.x_distance,
+            centre[1] + self.y_distance
         )
 
         if not is_centre:
