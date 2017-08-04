@@ -34,6 +34,7 @@ class Player():
         self.step = 1
         self.colour = colour
         self.name = 'Name'
+        self.mute = "False"
         self.cast_spell = None
 
         self.initial_position = (0, 0)
@@ -50,6 +51,7 @@ class Player():
         config['Player']['name'] = self.name
         config['Player']['x'] = str(self.x)
         config['Player']['y'] = str(self.y)
+        config['Player']['mute'] = str(self.mute)
 
         with open('player_save', 'w') as configfile:
             config.write(configfile)
@@ -70,7 +72,7 @@ class Player():
                     int(player_save_info['y'])
                 )
             )
-
+            self.set_mute(player_save_info['mute'])
             return True
 
         return False
@@ -82,6 +84,10 @@ class Player():
     def set_position(self, position):
         self.x, self.y = position
         self.ready = True
+
+    def set_mute(self, mute, save = False):
+        self.mute = mute
+        if save: self.save_to_config()
 
     def render(self):
         font = pygame.font.Font(client.font, 30)

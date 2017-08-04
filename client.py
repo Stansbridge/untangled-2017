@@ -57,7 +57,6 @@ class GameClient():
         pygame.font.init()
 
         # Initialise music
-        self.mute = False
         pygame.mixer.init()
 
         # Initialise the joystick.
@@ -82,7 +81,6 @@ class GameClient():
             LevelMusic('assets/music/song.mp3')
         )
         self.map.music.load_music()
-        LevelMusic.play_music_repeat()
 
     def set_state(self, new_state):
         if(new_state and new_state != self.game_state):
@@ -99,9 +97,13 @@ class GameClient():
         tickspeed = 60
         last_direction = None
         cast = False # Flag for when player casts spell.
+        me = self.players.me
+
+        if me.mute == "False":
+            print (me.mute)
+            LevelMusic.play_music_repeat()
 
         try:
-
             while running:
                 self.screen.fill((white))
                 clock.tick(tickspeed)
@@ -120,16 +122,15 @@ class GameClient():
                     print("Help menu option pressed")
                     self.game_state = GameState.MENU
                 elif(self.game_state.value == GameState.MUTE.value):
-                    if self.mute == False:
-                        self.mute = True
+                    if me.mute == "False":
+                        me.set_mute("True", True)
                         LevelMusic.stop_music()
-                    else:
-                        self.mute = False
+                    elif me.mute == "True":
+                        me.set_mute("False", True)
                         LevelMusic.play_music_repeat()
                     self.game_state = GameState.MENU
                 else:
                     # handle inputs
-                    me = self.players.me
                     for event in pygame.event.get():
                         if event.type == pygame.QUIT or event.type == pygame.locals.QUIT:
                             running = False
