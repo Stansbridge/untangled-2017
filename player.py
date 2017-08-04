@@ -34,7 +34,7 @@ class Player():
         self.step = 1
         self.colour = colour
         self.name = 'Name'
-        self.mute = "False"
+        self.mute = 'True'
         self.cast_spell = None
 
         self.initial_position = (0, 0)
@@ -72,7 +72,7 @@ class Player():
                     int(player_save_info['y'])
                 )
             )
-            self.set_mute(player_save_info['mute'])
+            self.set_mute(player_save_info.get('mute', 'True'))
             return True
 
         return False
