@@ -35,6 +35,7 @@ class Player():
         self.size = (map_module.TILE_PIX_WIDTH, map_module.TILE_PIX_HEIGHT)
         self.step = 1
         self.colour = colour
+        self.mute = 'True'
         self.tileset = Tileset(client.player_animation_tileset_path, (3, 4), (32, 32))
         self.name = ''
         self.x, self.y = (0, 0)
@@ -54,6 +55,7 @@ class Player():
         config['Player']['name'] = self.name
         config['Player']['x'] = str(self.x)
         config['Player']['y'] = str(self.y)
+        config['Player']['mute'] = str(self.mute)
 
         with open('player_save', 'w') as configfile:
             config.write(configfile)
@@ -74,7 +76,7 @@ class Player():
                     int(player_save_info['y'])
                 )
             )
-
+            self.set_mute(player_save_info.get('mute', 'True'))
             return True
 
         return False
@@ -100,6 +102,10 @@ class Player():
 
         self.x, self.y = position
         self.ready = True
+
+    def set_mute(self, mute, save = False):
+        self.mute = mute
+        if save: self.save_to_config()
 
     def render(self):
         font = pygame.font.Font(client.font, 30)
