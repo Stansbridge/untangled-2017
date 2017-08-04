@@ -198,7 +198,7 @@ class GameClient():
                     self.map.render()
                     me.render()
                     if me.cast_spell:
-                        me.cast_spell.render(me.is_centre, me.get_position())
+                        me.cast_spell.render()
 
                     self.players.set(self.network.node.peers())
                     # check network
@@ -214,7 +214,7 @@ class GameClient():
                                 if event.group == "world:combat":
                                     new_spell_properties = bson.loads(event.msg[0])
                                     network_spell_caster = self.players.get(event.peer_uuid)
-                                    network_spell_caster.cast_spell = Spell(self, 10, 0)
+                                    network_spell_caster.cast_spell = Spell(network_spell_caster, (0, 0))
                                     network_spell_caster.cast_spell.set_properties(SpellProperties(**new_spell_properties))
 
                                 if network_player:
@@ -222,6 +222,8 @@ class GameClient():
 
                         except Exception as e:
                             print(e)
+                            import traceback
+                            print(traceback.format_exc())
                             pass
 
                     # if there are other peers we can start sending to groups
@@ -234,7 +236,7 @@ class GameClient():
                         try:
                             player.render()
                             if player.cast_spell:
-                                player.cast_spell.render(player.is_centre, player.get_position())
+                                player.cast_spell.render()
                         except PlayerException as e:
                             # PlayerException due to no initial position being set for that player
                             print(e)

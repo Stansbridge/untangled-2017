@@ -133,62 +133,58 @@ class Player():
         return Position(self.x, self.y)
 
     def attack(self, action, direction):
-        centre = self.map.get_centre()
-
         if action == Action.SPELL:
             if direction == Action_Direction.UP:
-                self.cast_spell = Spell(self, 0, -10)
+                self.cast_spell = Spell(self, (0, -0.25))
             elif direction == Action_Direction.RIGHT:
-                self.cast_spell = Spell(self, 10, 0)
+                self.cast_spell = Spell(self, (0.25, 0))
             elif direction == Action_Direction.DOWN:
-                self.cast_spell = Spell(self, 0, 10)
+                self.cast_spell = Spell(self, (0, 0.25))
             elif direction == Action_Direction.LEFT:
-                self.cast_spell = Spell(self, -10, 0)
+                self.cast_spell = Spell(self, (-0.25, 0))
         elif action == Action.SWIPE:
             #TODO
             return
 
 class Spell():
-    def __init__(self, player, x_velocity, y_velocity, position=(0,0), size=(8,8), colour=(0,0,0)):
+    def __init__(self, player, velocity, position=None, size=(0.25, 0.25), colour=(0,0,0)):
         self.player = player
-        self.x_velocity = x_velocity
-        self.y_velocity = y_velocity
         self.size = size
         self.colour = colour
-        self.x_distance = 0
-        self.y_distance = 0
 
-        self.set_position(position)
+        if position == None:
+            # spawn at player - additional maths centres the spell
+            self.x = self.player.x + 0.5 - (size[0] / 2)
+            self.y = self.player.y + 0.5 - (size[1] / 2)
+        else:
+            self.set_position(position)
 
-    def render(self, is_centre, player_position):
-        position = (
-            self.player.map.get_centre()[0] + self.x_distance,
-            self.player.map.get_centre()[1] + self.y_distance
+        self.set_velocity(velocity)
+
+    def render(self):
+        pixel_pos = self.player.map.get_pixel_pos(self.x, self.y);
+        pixel_size = (
+            self.size[0] * map_module.TILE_PIX_WIDTH,
+            self.size[1] * map_module.TILE_PIX_HEIGHT
         )
+        pygame.draw.rect(self.player.screen, self.colour, Rect(pixel_pos, pixel_size))
 
-        if not is_centre:
-            position = (
-                player_position[0] - self.player.map.centre_player.x + position[0],
-                player_position[1] - self.player.map.centre_player.y + position[1]
-            )
-
-        pygame.draw.rect(self.player.screen, self.colour, Rect(position, self.size))
-
-        # Increment distances to track how far the projectile has travelled.
-        self.x_distance += self.x_velocity
-        self.y_distance += self.y_velocity
+        # move the projectile by its velocity
+        self.x += self.velo_x
+        self.y += self.velo_y
 
     def get_properties(self):
-        return SpellProperties(self.x, self.y, self.x_velocity, self.y_velocity)
+        return SpellProperties(self.x, self.y, self.velo_x, self.velo_y)
 
     def set_properties(self, properties):
-        self.x, self.y, self.x_velocity, self.y_velocity = properties
+        self.x, self.y, self.velo_x, self.velo_y = properties
 
-    def set_position(self, new_position):
-        self.x, self.y = new_position
+    def set_position(self, position):
+        self.x, self.y = position
 
-    def hit_target(self,player): # Return if the spell has hit another player.
-        return self.rect.colliderect(player.map.get_tile_attributes(player.x, player.y))
+    def set_velocity(self, velocity):
+        self.velo_x, self.velo_y = velocity
+
 
 class PlayerManager():
     def __init__(self, me):
