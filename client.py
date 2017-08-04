@@ -30,6 +30,8 @@ width = 1024
 height = 1024
 
 font = 'assets/fonts/alterebro-pixel-font.ttf'
+level_tileset_path = 'assets/tilesets/main.png'
+player_animation_tileset_path = 'assets/tilesets/player.png'
 
 class GameState(Enum):
     MENU = 0
@@ -44,7 +46,8 @@ class GameClient():
     def __init__(self):
         self.network = Network()
         self.setup_pygame()
-        self.players = PlayerManager(Player(self.screen, self.map))
+        me = Player(self.screen, self.map)
+        self.players = PlayerManager(me)
         self.map.set_centre_player(self.players.me)
         self.menu = MainMenu(self.screen, self.players)
 
@@ -70,13 +73,13 @@ class GameClient():
             pygame.locals.KEYDOWN])
 
         self.levels = {
-            "main": ProceduralLevel(4343438483844)
+            "main": ProceduralLevel(42)
         }
 
         self.map = Map(
             self.screen,
             self.levels.get("main"),
-            Tileset(pygame.image.load('assets/tilesets/main.png').convert(), (16, 16)),
+            Tileset(level_tileset_path, (16, 16), (32, 32)),
             LevelMusic('assets/music/song.mp3')
         )
         self.map.music.load_music()
