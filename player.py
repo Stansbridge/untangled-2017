@@ -35,6 +35,7 @@ class Player():
         self.colour = colour
         self.name = 'Name'
         self.cast_spells = []
+        self.spell_limit = 50
 
         self.initial_position = (0, 0)
         self.set_position(self.initial_position)
@@ -136,6 +137,10 @@ class Player():
                 spell = Spell(self, (0, 0.25))
             elif direction == Movement.LEFT:
                 spell = Spell(self, (-0.25, 0))
+
+            # Remove first element of list if limit reached.
+            if len(self.cast_spells) > self.spell_limit:
+                self.cast_spells[1:]
             self.cast_spells.append(spell)
         elif action == Action.SWIPE:
             #TODO
