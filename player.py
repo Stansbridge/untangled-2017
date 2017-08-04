@@ -21,12 +21,6 @@ class Action(Enum):
     SPELL = 1
     SWIPE = 2
 
-class Action_Direction(Enum):
-    UP = 1
-    RIGHT = 2
-    DOWN = 3
-    LEFT = 4
-
 class PlayerException(Exception):
     pass
 
@@ -134,13 +128,13 @@ class Player():
 
     def attack(self, action, direction):
         if action == Action.SPELL:
-            if direction == Action_Direction.UP:
+            if direction == Movement.UP:
                 self.cast_spell = Spell(self, (0, -0.25))
-            elif direction == Action_Direction.RIGHT:
+            elif direction == Movement.RIGHT:
                 self.cast_spell = Spell(self, (0.25, 0))
-            elif direction == Action_Direction.DOWN:
+            elif direction == Movement.DOWN:
                 self.cast_spell = Spell(self, (0, 0.25))
-            elif direction == Action_Direction.LEFT:
+            elif direction == Movement.LEFT:
                 self.cast_spell = Spell(self, (-0.25, 0))
         elif action == Action.SWIPE:
             #TODO

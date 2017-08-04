@@ -20,7 +20,7 @@ from player import *
 from screen import MainMenu
 from level import ProceduralLevel
 from tile import Tileset
-
+from music import LevelMusic
 
 white = (255,255,255)
 black = (0,0,0)
@@ -77,10 +77,10 @@ class GameClient():
             self.screen,
             self.levels.get("main"),
             Tileset(pygame.image.load('assets/tilesets/main.png').convert(), (16, 16)),
-            Music('assets/music/song.mp3')
+            LevelMusic('assets/music/song.mp3')
         )
         self.map.music.load_music()
-        self.map.music.play_music_repeat()
+        LevelMusic.play_music_repeat()
 
     def set_state(self, new_state):
         if(new_state and new_state != self.game_state):
@@ -143,13 +143,13 @@ class GameClient():
                             elif event.key == pygame.locals.K_RETURN:
                                 cast = True
                                 if last_direction == Movement.LEFT:
-                                    me.attack(Action.SPELL, Action_Direction.LEFT)
+                                    me.attack(Action.SPELL, Movement.LEFT)
                                 elif last_direction == Movement.UP:
-                                    me.attack(Action.SPELL, Action_Direction.UP)
+                                    me.attack(Action.SPELL, Movement.UP)
                                 elif last_direction == Movement.DOWN:
-                                    me.attack(Action.SPELL, Action_Direction.DOWN)
+                                    me.attack(Action.SPELL, Movement.DOWN)
                                 else:
-                                    me.attack(Action.SPELL, Action_Direction.RIGHT)
+                                    me.attack(Action.SPELL, Movement.RIGHT)
                             pygame.event.clear(pygame.locals.KEYDOWN)
 
                     # https://stackoverflow.com/a/15596758/3954432
