@@ -37,6 +37,7 @@ class GameState(Enum):
     HELP = 2
     CHARACTER = 3
     QUIT = 4
+    MUTE = 5
 
 class GameClient():
     game_state = GameState.MENU
@@ -56,6 +57,7 @@ class GameClient():
         pygame.font.init()
 
         # Initialise music
+        self.mute = False
         pygame.mixer.init()
 
         # Initialise the joystick.
@@ -116,6 +118,14 @@ class GameClient():
                     break
                 elif(self.game_state.value == GameState.HELP.value):
                     print("Help menu option pressed")
+                    self.game_state = GameState.MENU
+                elif(self.game_state.value == GameState.MUTE.value):
+                    if self.mute == False:
+                        self.mute = True
+                        LevelMusic.stop_music()
+                    else:
+                        self.mute = False
+                        LevelMusic.play_music_repeat()
                     self.game_state = GameState.MENU
                 else:
                     # handle inputs
