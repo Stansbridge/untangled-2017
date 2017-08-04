@@ -100,7 +100,6 @@ class GameClient():
         me = self.players.me
 
         if me.mute == "False":
-            print (me.mute)
             LevelMusic.play_music_repeat()
 
         try:
